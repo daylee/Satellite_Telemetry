@@ -9,7 +9,7 @@
 \usepackage{longtable,tabularx}
 \setlength\LTleft{0pt} 
 
-\title{Formal Specification of Small Satellite Telemetry Variables}
+\title{A Case Study in Formal Specification and Runtime Verification of a CubeSat Communications System}
 
 \author{Zachary A. Luppen \footnote{Ph.D. student, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
 %\affil{Iowa State University, Ames, Iowa, 50011, USA.}
@@ -18,32 +18,17 @@
 \author{Dae Young Lee \footnote{Assistant Professor, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
 \affil{Iowa State University, Ames, Iowa, 50011, USA.}
 
-%% Outline
-
-%% Introduction
-% Discuss CubeSat challenges.
-% Importance of system health monitoring.
-% Introduce formal methods.
-
-%% Analysis
-% Provide a generic description of CubeSat telemetry parameters.
-% Talk about specifying parameters.
-% Describe how data is collected from CubeSat, decoded, saved.
-% Detail how we can run this through R2U2 to better understand performance.
-
-%% Discussion
-% Analysis of telemetry data can help us better monitor system health. Understand faults.
-% During testing, can help diagnose potential problems and validate system performance.
-
-%% Conclusion
-% Formal methods are helpful for EVERYTHING
-
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-This paper introduces a methodology of utilizing sample CubeSat telemetry data to formally specify system status. A dataset of typically desired CubeSat telemetry variables is assembled by reviewing previous missions. These variables are then listed according to their representation and requirement. Formal specifications are written in Mission-Time Linear Temporal Logic (MLTL) using these variables and their threshold values to describe desired behavior of CubeSats. Test data of these parameters are then run through the Realizable Responsive Unobtrusive Unit (R2U2) system health management tool for verification. Our results show the applicability of formal methods to a single aspect of CubeSat, and how they can be used to verify system performance and aid in reliable design.
+
+CubeSats are garnering a lot of attention from governmental, commercial and academic research communities due to their cheap price and easy accessibility to space. Although a CubeSat offers the potential to replace large and complex satellites for various space missions, developing a high-integrity platform that can fly in space requires robust software performance. The communications system of a CubeSat -- and any other spacecraft mission for that matter -- is absolutely vital to mission success. However, failed communications systems are commonplace for CubeSat projects and are one of the leading issues these missions face both now and in the future. Motivated by the large number of CubeSat communications failures, in this project we propose to apply formal specification and runtime verification to a real, full-scale CubeSat communications system. We develop a reference set of CubeSat communications fault specifications in mission-time linear temporal logic (MLTL) that designers can reference in future missions. We elucidate the applications of formal specification of a CubeSat system and its subsystems, creating a distributed hierarchy of specifications and highlighting the system's complexity. We design a configuration using the Realizable Responsive Unobtrusive Unit (R2U2) to demonstrate how performance of a CubeSat communications system can be evaluated in real-time. We experiment with fault detection in the domains of satellite sensor accuracy, signal strength and expected Doppler shift, and signal acquisition.
+
+%THIS TEXT IS A PLACEHOLDER. In this paper, we introduce a methodology for formally specifying and performing runtime verification of a CubeSat communications system. Motivated by the large number of CubeSat communications failures, we provide a reference set of fault specifications that can be used to aid in design of communications subsystems. We elucidate the applications of formal specification of a CubeSat system and its subsystems, creating a distributed hierarchy of specifications and highlighting their complexity. We use formal techniques with a non-simplified CubeSat communications system to evaluate system performance and provide lessons learned for other designers.
+
+%This paper introduces a methodology of utilizing sample CubeSat telemetry data to formally specify system status. A dataset of typically desired CubeSat telemetry variables is assembled by reviewing previous missions. These variables are then listed according to their representation and requirement. Formal specifications are written in Mission-Time Linear Temporal Logic (MLTL) using these variables and their threshold values to describe desired behavior of CubeSats. Test data of these parameters are then run through the Realizable Responsive Unobtrusive Unit (R2U2) system health management tool for verification. Our results show the applicability of formal methods to a single aspect of CubeSat, and how they can be used to verify system performance and aid in reliable design.
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -54,61 +39,48 @@ This paper introduces a methodology of utilizing sample CubeSat telemetry data t
 \section{Introduction}
 %%%%%%%%%%%%%%%%%%%%%
 
-CubeSats are getting a lot of attention from many research communities due to their cheap price and easy accessibility to space \cite{cubesat101}.
-%
-Although a CubeSat offers the potential to replace large and complex satellites for various space missions, novel technology requires robust software performance.
-% Need discussion.
-This is difficult to implement for these small-scale missions and many failures (either partial or entire missions) have occurred \cite{alanazi2018, Improving2017}.
-% 
-All subsystems of a CubeSat are a combination of hardware and software components built on an embedded system, and so their design needs to consider characteristics such as real-time response, reactivity with other subsystems, minimized software with optimal data processing speeds, safety, reliability and nominal performance in the harsh environment of space.
-%
-All of these factors, coupled with CubeSat missions having relatively low budgets and fast turnaround times, increase the chances of CubeSat mission failure \cite{alanazi2018, Improving2017}.\\
+Over the past decade, the use of small satellites (hereafter referred to as CubeSats) by academic, governmental, commercial as well as amateur entities has grown dramatically \cite{cubesat101,Poghosyan2016,Villela2019}. Their relatively low cost and fast turnaround times make CubeSats ideal projects for accessing and experimenting in space \cite{cubesat101}. As of June 2020, over 1,300 CubeSats have been launched into space \cite{Kulu2020}. While these types of missions have limited capabilities and will not replace flagship missions built by such agencies as NASA and ESA, the use of CubeSats is only expected to rise in the coming years \cite{Improving2017,cubesat101}. The low cost and short production times for these missions are appealing to developers, but they also act as constraints for these projects. Although CubeSats offer a scaled-down, simplified platform for developers, they still experience many of the same problems that larger satellites have \cite{Improving2017}. Flaws in design, workmanship, software, low reliability of hardware -- usually commercial off-the-shelf (COTS) -- components, lack of adequate testing and communications failures are among a few of the many problems experienced with building CubeSats \cite{Improving2017}. Some of these issues can be attributed to the cost and time constraints, such as parts quality, testing and design flaws. Other problems are inherent with spacecraft projects, and will be faced by developers no matter the cost or time spent working on the mission.\\
+
+Communications system failures are currently one of the most commonly widespread problems experienced by CubeSat developers \cite{Improving2017,Langer2016}. The communications system of a CubeSat -- and any other spacecraft mission for that matter -- is absolutely vital to mission success. While a CubeSat could be powered on properly and collecting data to perform invaluable science, a failure to communicate that information back to the ground makes the entire mission pointless. These systems are crucial to their missions, so good system performance is vital. Of the typical CubeSat subsystems however, communications systems are decently complex and tend to fail more \cite{Improving2017,cubesat101}. Failures can be attributed to lack of experience, poor design, incorrect link budgeting (used to guide design), electrical failures, and several other causes. With the growing popularity of CubeSats, it is important that methods be developed to aid in the design and reliability of their communications systems.\\
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+%\centering
+\includegraphics[width=1.0\textwidth]{Fig/SciTech1.png}
+\caption{A representation of how formal methods would be applied during the flight stage of a CubeSat mission. Telemetry is sent by the CubeSat and received by the ground station. The telemetry data then gets fed into the Realizable Responsive Unobtrusive Unit (R2U2) tool and the data gets run against the specifications defined by the mission engineers. R2U2 then outputs results describing which specifications were met or not met.}
+\label{Diagram}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Testing
+
+%CubeSats are getting a lot of attention from multiple research communities due to their cheap price and easy accessibility to space \cite{cubesat101}. Although a CubeSat offers the potential to replace large and complex satellites for various space missions, novel technology requires robust software performance. % Need discussion.
+%This is difficult to implement for these small-scale missions and many failures (either partial or entire missions) have occurred \cite{alanazi2018, Improving2017}. All subsystems of a CubeSat are a combination of hardware and software components built on an embedded system, and so their design needs to consider characteristics such as real-time response, reactivity with other subsystems, minimized software with optimal data processing speeds, safety, reliability and nominal performance in the harsh environment of space. All of these factors, coupled with CubeSat missions having limitations such as relatively low budgets and fast turnaround times, increase the chances of CubeSat mission failure \cite{alanazi2018, Improving2017}.\\
 % Why budget and fast turnabround make mission fail?
 
-Issues with CubeSat missions take place at all stages, and are very broad in nature \cite{Improving2017}.
-%
-Flaws in design, workmanship, software, low reliability of hardware -- usually commercial off-the-shelf (COTS) -- components, lack of adequate testing and communications failures are among a few of the many problems experienced with building CubeSats, as is the case for larger satellites \cite{Improving2017}.
-%
-Even in decent shape, CubeSats can still experience faults, memory leaks, bad data collections, and other issues inherent with embedded systems. For this reason, collecting telemetry from any spacecraft is a necessity.
-%
-Aside from comprising the data collected from an onboard payload, typical CubeSat telemetry consists of measurements of the power systems, on-board flight computer (FCPU), attitude, determination and control system (ADCS) and communications. Telemetry collection is the system health monitoring that allows operators to understand, to a degree, how the spacecraft is performing.\\
+%Issues with CubeSat missions take place at all stages, and are very broad in nature \cite{Improving2017}. Flaws in design, workmanship, software, low reliability of hardware -- usually commercial off-the-shelf (COTS) -- components, lack of adequate testing and communications failures are among a few of the many problems experienced with building CubeSats, as is the case for larger satellites \cite{Improving2017}. Even in decent shape, CubeSats can still experience faults, memory leaks, bad data collections, and other issues inherent with embedded systems.\\
 
-System health monitoring is useful in that we can know what various sensors on the spacecraft are measuring, but how do we know that those values are correct? How do we know the sensors on the craft are as accurate as the manufacturers say they are? How do we know if the spacecraft is actually operating as intended? Answering these sorts of questions is one of the goals of the field of formal methods. Formal methods are a collection of mathematical techniques used to improve the reliability of systems \cite{Peled2019,Bjrner2014}. While there are many different techniques and tools developed to specify, model and verify certain systems, there have not as yet been any methods or tools developed specifically for CubeSat missions.\\
+%The communications system of a CubeSat -- and any other spacecraft mission for that matter -- is absolutely vital to mission success. While a CubeSat could be powered on properly and collecting data to perform invaluable science, a failure to communicate that information back to the ground makes the entire mission pointless. These systems are crucial to the mission, so good system performance is vital. Communications systems can be rather complex though, and a lack of experience with RF can hinder their design and performance. Failed communications systems are commonplace for CubeSat projects \cite{Improving2017,Langer2016} and one of the leading issues these missions face both now and in the future. Since CubeSat popularity is only expected to grow in the near future \cite{Improving2017}, communications subsystem failures on CubeSats need to be addressed promptly.\\
 
-In this document, we will demonstrate how formal methods can be used to complement CubeSat telemetry. We will first develop an example set of telemetry parameters that would be considered useful and sought-after information for a general CubeSat mission. For our purposes, we reference several past CubeSat and satellite missions to demonstrate what sort of system measurements are necessary in CubeSat telemetry. Then we will introduce formal specification and demonstrate how these parameters can be written into logic statements that compare the these parameters either against sensor bounds or expected output. A set of sample data collections is then generated, and we use the Realizable Responsive Unobtrusive Unit (R2U2) system health management tool to run this data against those specifications. Following this, we discuss our results and demonstrate the utility of formal specification and verification for CubeSat missions. We conclude by discussing the utility of applying formal methods to CubeSats in order to improve mission reliability and aid CubeSat developers in future mission designs.
+%To aid in communications system design and performance analysis, we apply formal specification and runtime verification to a non-simplified CubeSat communications system. These techniques stem from the field of formal methods, a set of mathematically rigorous techniques used in the development of software and hardware systems. These techniques have been used in many fields, particularly the aviation industry and in air traffic control systems \cite{GCMTR16,DRR17}, but very sparsely in the CubeSat field except for better understanding of the global positioning system (GPS) and GLObal NAvigation Satellite System (GLONASS) \cite{peng2013}. While CubeSat systems are complex and offer many opportunities for applying these techniques, as of yet nobody has done so. Motivated by the large number of CubeSat failures, particularly due to communications system issues, we provide a reference set of Cubesat communications fault specifications that Cubesat designers can reference in future missions. We elucidate the applications of formal specification of a Cubesat system and its subsystems, creating a distributed hierarchy of specifications and highlighting their complexity. We use formal techniques with an non-simplified Cubesat communications system to evaluate system performance and provide lessons learned for other designers.\\
 
+%Before performing design-time and run-time verification, the system must first be described using specifications. A specification describes the desired performance of some aspect of a system. Since we intend to focus on the CubeSat and ground station communications system, our specifications relate to operations of it. We identify the needs of the communications system, particularly with aspects involving antenna pointing, transmit/receive operations, measurement of parameters during radio operation, and CubeSat communications monitoring, among others. Our specifications are written using Mission-time Linear Temporal Logic (MLTL) \cite{RRS14,LVR19}. MLTL has been used in many industrial case studies \cite{RRS14,GRS14,SRRMMI15,RSI15,SMR15,SMR16,MRS17}, and was the official logic of the 2018 Runtime Verification Benchmark Competition \cite{RVBC2018}. Many specifications from other case studies, in logics such as MTL \cite{AH90} and STL \cite{MN04}, can be represented in MLTL. 
+%We intuitively relate MLTL to LTL and MTL as follows:
+%(1) MLTL formulas are LTL formulas with bounded intervals over temporal operators, and interpreted over finite traces.
+%(2) MLTL formulas are MTL formulas without any unbounded intervals, and interpreted over finite traces.\\
 
-% Let's think about the title of the second section.
-%%%%%%%%%%%%%%%%%%%%%
-\section{Development of CubeSat Telemetry Example}
-%%%%%%%%%%%%%%%%%%%%%
-% We will describe how we prepare our test data.
+%Since specification is the biggest bottleneck in the design of robust embedded systems \cite{Roz17}, and since formal specification can be a very enlightening activity for the system design process, we treat this as an activity unto itself. 
 
-We first consider information comprising typical CubeSat telemetry parameters. 
+%For this reason, collecting telemetry from any spacecraft is a necessity.
+%Aside from comprising the data collected from an onboard payload, typical CubeSat telemetry consists of measurements of the power systems, on-board flight computer (FCPU), attitude, determination and control system (ADCS) and communications. Telemetry collection is the system health monitoring that allows operators to understand, to a degree, how the spacecraft is performing.\\
 
-%%%%%%%%%%%%%%%%%%%%%
-\section{Formal Specification and Logic Statements}
-%%%%%%%%%%%%%%%%%%%%%
+%System health monitoring is useful in that we can know what various sensors on the spacecraft are measuring, but how do we know that those values are correct? How do we know the sensors on the craft are as accurate as the manufacturers say they are? How do we know if the spacecraft is actually operating as intended? Answering these sorts of questions is one of the goals of the field of formal methods. Formal methods are a collection of mathematical techniques used to improve the reliability of systems \cite{Peled2019,Bjrner2014}. While there are many different techniques and tools developed to specify, model and verify certain systems, there have not as yet been any methods or tools developed specifically for CubeSat missions.\\
 
+%In this document, we will demonstrate how formal methods can be used to complement CubeSat telemetry. We will first develop an example set of telemetry parameters that would be considered useful and sought-after information for a general CubeSat mission. For our purposes, we reference several past CubeSat and satellite missions to demonstrate what sort of system measurements are necessary in CubeSat telemetry. Then we will introduce formal specification and demonstrate how these parameters can be written into logic statements that compare the these parameters either against sensor bounds or expected output. A set of sample data collections is then generated, and we use the Realizable Responsive Unobtrusive Unit (R2U2) system health management tool to run this data against those specifications. Following this, we discuss our results and demonstrate the utility of formal specification and verification for CubeSat missions. We conclude by discussing the utility of applying formal methods to CubeSats in order to improve mission reliability and aid CubeSat developers in future mission designs.
 
-
-%%%%%%%%%%%%%%%%%%%%%
-\section{System Health Monitoring Using R2U2}
-%%%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%%%
-\section{Discussion}
-%%%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion}
-%%%%%%%%%%%%%%%%%%%%%
-
-
+\clearpage
 
 %%%%%%%%%%%%%%%%%%%%%
 \bibliography{References}
