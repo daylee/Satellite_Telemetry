@@ -22,7 +22,7 @@
 \RequirePackage[T1]{fontenc}
 \RequirePackage[utf8]{inputenc}
 \RequirePackage{microtype}
-\RequirePackage{newtxtext,newtxmath}
+%\RequirePackage{newtxtext,newtxmath}
 
 \RequirePackage[letterpaper,margin=1in]{geometry}
 \RequirePackage{enumitem}
