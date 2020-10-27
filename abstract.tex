@@ -1,0 +1,366 @@
+\documentclass[conf]{new-aiaa}
+%\documentclass[journal]{new-aiaa} for journal papers
+\usepackage[utf8]{inputenc}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\usepackage{longtable,tabularx}
+\setlength\LTleft{0pt} 
+\usepackage{listings}
+\lstset{basicstyle=\small\ttfamily,columns=flexible,breaklines=true}
+
+\title{A Case Study in Formal Specification and Runtime Verification of a CubeSat Communications System}
+
+\author{Zachary A. Luppen \footnote{Ph.D. student, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
+%\affil{Iowa State University, Ames, Iowa, 50011, USA.}
+%\affil{Iowa State University, Ames, Iowa, 50011, USA.}
+\author{Kristin Y. Rozier \footnote{Assistant Professor, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
+\author{Dae Young Lee \footnote{Assistant Professor, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
+\affil{Iowa State University, Ames, Iowa, 50011, USA.}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+CubeSats are garnering a lot of attention from governmental, commercial and academic research communities due to their cheap price and easy accessibility to space. Although a CubeSat offers the potential to replace large and complex satellites for various space missions, developing a high-integrity platform that can fly in space requires robust software performance. The communications system of a CubeSat -- and any other spacecraft mission for that matter -- is critical to mission success. However, failed communications systems are commonplace for CubeSat projects and are one of the leading issues these missions face.
+%both now and in the future. 
+Motivated by the large number of CubeSat communications failures, in this project we propose to apply formal specification and runtime verification to a %real, full-scale 
+CubeSat communications system. We develop a reference set of CubeSat communications fault specifications in mission-time linear temporal logic (MLTL) that designers can reference in future missions. We elucidate the applications of formal specification of a CubeSat system and its subsystems, creating a distributed hierarchy of specifications and highlighting the system's complexity. We design a configuration using the Realizable Responsive Unobtrusive Unit (R2U2) to demonstrate how performance of a CubeSat communications system can be evaluated in real-time. We experiment with fault detection in the domains of satellite sensor accuracy, signal strength and expected Doppler shift, and signal acquisition.
+
+%THIS TEXT IS A PLACEHOLDER. In this paper, we introduce a methodology for formally specifying and performing runtime verification of a CubeSat communications system. Motivated by the large number of CubeSat communications failures, we provide a reference set of fault specifications that can be used to aid in design of communications subsystems. We elucidate the applications of formal specification of a CubeSat system and its subsystems, creating a distributed hierarchy of specifications and highlighting their complexity. We use formal techniques with a non-simplified CubeSat communications system to evaluate system performance and provide lessons learned for other designers.
+
+%This paper introduces a methodology of utilizing sample CubeSat telemetry data to formally specify system status. A dataset of typically desired CubeSat telemetry variables is assembled by reviewing previous missions. These variables are then listed according to their representation and requirement. Formal specifications are written in Mission-Time Linear Temporal Logic (MLTL) using these variables and their threshold values to describe desired behavior of CubeSats. Test data of these parameters are then run through the Realizable Responsive Unobtrusive Unit (R2U2) system health management tool for verification. Our results show the applicability of formal methods to a single aspect of CubeSat, and how they can be used to verify system performance and aid in reliable design.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%
+%% Nomenclature
+%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%
+
+Over the past decade, the use of small satellites (hereafter referred to as CubeSats) by academic, governmental, commercial as well as amateur entities has grown dramatically \cite{cubesat101,Poghosyan2016,Villela2019}. Their relatively low cost and fast turnaround times make CubeSats ideal projects for accessing and experimenting in space \cite{cubesat101}. As of June 2020, over 1,300 CubeSats have been launched into space \cite{Kulu2020}. While these types of missions have limited capabilities and will not replace flagship missions built by such agencies as NASA and ESA, the use of CubeSats is only expected to rise in the coming years \cite{Improving2017,cubesat101}. The low cost and short production times for these missions are appealing to developers, but they also act as constraints for these projects. Although CubeSats offer a scaled-down, simplified platform for developers, they still experience many of the same problems that larger satellites have \cite{Improving2017}. Flaws in design, workmanship, software, low reliability of hardware -- usually commercial off-the-shelf (COTS) -- components, lack of adequate testing and communications failures are among a few of the many problems experienced with building CubeSats \cite{Improving2017}. Some of these issues can be attributed to the cost and time constraints, such as parts quality, testing and design flaws. Other problems are inherent with spacecraft projects, and will be faced by developers no matter the cost or time spent working on the mission.
+
+Communications system failures are currently one of the most commonly widespread problems experienced by CubeSat developers \cite{Improving2017,Langer2016}. The communications system of a CubeSat -- and any other spacecraft mission for that matter -- is absolutely vital to mission success. While a CubeSat could be powered on properly and collecting data to perform invaluable science, a failure to communicate that information back to the ground makes the entire mission pointless. These systems are crucial to their missions, so good system performance is vital. Of the typical CubeSat subsystems however, communications systems are decently complex and tend to fail more than others \cite{Improving2017,cubesat101}. Failures can be attributed to lack of experience, poor design, incorrect link budgeting (used to guide design), electrical failures, and several other causes. With the growing popularity of CubeSats, it is important that methods be developed to aid in the design and reliability of their communications systems.
+
+To aid in communications system design and performance analysis, we apply formal specification and runtime verification to a full-scale modeled CubeSat communications system. These techniques stem from the field of formal methods, a set of mathematically rigorous techniques used in the development of software and hardware systems. These techniques have been used in many fields, particularly the aviation industry and in air traffic control systems \cite{GCMTR16,DRR17}, to verify that they're operating properly. They have been used very sparsely in the spacecraft field except for better understanding of the global positioning system (GPS) and GLObal NAvigation Satellite System (GLONASS) \cite{peng2013}. While CubeSat systems are complex and offer many opportunities for applying these techniques, as of yet nobody has done so. Since communications failures are quite common among satellites, they present the perfect opportunity to apply methods that have been used to verify other systems.
+
+For our case study, we use a simulated ground station system as shown in Figure 1. Our setup consists of two computers each connected to a software-defined radio (SDR) and antenna. One SDR, an Ettus Research USRP B210 acts as a transmitter, emulating a CubeSat that is downlinking data. The USRP B210 is a research-grade SDR, and has been used in other ground station communications systems \cite{choi2017}. The second SDR, a Great Scott Gadgets HackRF acts as a receiver, emulating the ground station. The HackRF SDR was developed by Michael Ossmann to create a simple but robust platform that professionals and amateurs alike could use in radio projects \cite{GSG}. The operations of each radio are designed and run using the GNU Radio software. GNU Radio is a free, open-source software development toolkit that allows SDR users to design their radios per their wants and needs \cite{gnuradio}. This configuration allows us to have a communications system that is modifiable throughout our study. Furthermore, by having this system separate from a current CubeSat mission in design/operation, we are able to experiment without introducing risk or delay to a mission.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+%\centering
+\includegraphics[width=1.0\textwidth]{Fig/Setup.png}
+\caption{A model of the simulated communications system used in this study. We make use of two computers each with its own software-defined radio to act as the CubeSat and ground station. In this configuration, we perform data transfer of sample telemetry files between the stations. During this operation, R2U2 is constantly monitoring for recent telemetry. When telemetry is received, R2U2 compares it against the user-defined specifications to verify nominal system operation, and outputs its results.}
+\label{Overview}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We first develop a set of system variables that will be used and monitored in our communications system configuration. For our CubeSat variables, we make use of those intended for a designed CubeSat mission called LATTE-cube as well as reference common design practices \cite{SMAD}. Many of the ground station system variables are derived from multiple designs \cite{choi2017, Asundi2013}. The former reference, \citep{choi2017} utilized the quantumCMD interface developed by Kratos. We also utilize parameters from the GPredict tool, which provides information related to orbit-tracking. Additionally, GPredict provides detailed information on many CubeSats in addition to the two-line element set (TLE) very commonly used in orbit tracking \cite{gpredict}. A partial list of the variables used for the communications system are shown in Figure \ref{Variables}. While we will not be able to truly test orbital parameters (since we're not using a real CubeSat), we will still be able to utilize their information for our purposes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.8\textwidth]{Fig/GPredictVAR.png}
+\caption{A list of the communications system variables relating to orbital information sourced from GPredict, which is needed to ensure that communication between the CubeSat and ground station is physically possible during expected passes.}
+\label{Variables}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Our design is also informed by the upcoming Iowa State University's (ISU) CySat mission. CySat is the university's first CubeSat mission. It is being built by undergraduate students and will carry an experimental radio payload. On the CubeSat side of the communications system, we look at variables related to both an ultra-high frequency radio (UHF) as well as an S-band radio, used for downlinking data at more efficient rates. On the ground side, we look at these same aspects in addition to the configuration of the ground station, its orientation and orbital tracking information. We use the GPredict tool for information related to orbit-tracking, as provides detailed information on many CubeSats in addition to the two-line element set (TLE) very commonly used in orbit tracking. Our specifications for the communications system are derived from the these previous designs, the NASA standard for CubeSats developed by the Goddard Space Flight Center (GSFC), and in some cases simply common sense. As an example, we want to ensure that the ground station only attempts communication with the CubeSat when it is above the horizon and within line-of-sight (LOS). While such a specification is blatantly obvious to a user, it is less so to an autonomous system. \\
+
+\section{Application of Formal Methods}
+
+\subsection{Specification}
+
+With a complete variable list, we then describe the operation of the system using specifications. Here, a specification describes the desired performance of an aspect of the system. Specifications are described as a massive bottleneck faced by the fields of formal methods and autonomous systems \cite{Roz16}. Since we focus on the CubeSat and ground station communications system, our specifications relate to its operations. In our specifications, we identify the needs of the communications system, paying close attention to aspects including antenna pointing, transmit/receive operations, measurement of parameters during radio operation, and CubeSat communications monitoring, among others. As an example, it is important to ensure that communications are occurring only when the spacecraft is above the horizon. We inherently know that this should be the case, but we cannot be sure that the software operates with a perfect understanding of the concept. Hence, a specification is written that says communication between the CubeSat and the ground station is only viable within a certain range of latitudes and longitudes. Another specification states that we specify the maximum amount of pointing error there can be for communication to still be considered viable, and otherwise tell the ground station to not attempt communication.
+
+For our specifications, we reference previous ground station designs, the NASA standard for satellite systems developed by the Goddard Space Flight Center (GSFC), and in some cases simply apply common sense \cite{choi2017,Asundi2013,Goddard}. The specifications are written using Mission-time Linear Temporal Logic (MLTL) \cite{RRS14,LVR19}. MLTL has been used in many industrial case studies \cite{RRS14,GRS14,SRRMMI15,RSI15,SMR15,SMR16,MRS17}, and was the official logic of the 2018 Runtime Verification Benchmark Competition \cite{RVBC2018}. Many specifications from other case studies, in logics such as MTL \cite{AH90} and STL \cite{MN04}, can be represented in MLTL. We intuitively relate MLTL to LTL and MTL as follows: (1) MLTL formulas are LTL formulas with bounded intervals over temporal operators, and interpreted over finite traces. (2) MLTL formulas are MTL formulas without any unbounded intervals, and interpreted over finite traces.
+
+MLTL was designed with the assumption that sensors are statistically likely to experience an off-nominal data point at some time during their operation. Rather than flagging a single point as a failure to meet specifications however, R2U2 can allow a user-specified amount of off-nominal data points to occur before declaring a failure. This means that if the data returns to nominal and expected values within a given number of steps, then those specifications remain satisfied.
+
+\subsection{Runtime Verification}
+
+With the system designed and properly described using specifications, we then implement runtime verification to demonstrate how a formal runtime verification tool is used to analyze system performance. For our purposes, we make use of the Realizable Responsive Unobtrusive Unit (R2U2) \cite{ARS17}. R2U2 offers an extensible framework for run-time system health management (SHM) of software systems and can be used for practically any system that is monitoring one or multiple datasets \cite{MRS17,ARS17}. R2U2 allows a user to compare the state of the system to its specifications and analyze how the system behaves in real time. The tool reasons with liveness properties, which are useful for real-time operations. R2U2 uses specifications written in MLTL, as time bounds account for extraneous data collections that tend to occur in operating sensors, such as barometers and altimeters.
+
+\section{Expected Results}
+
+For our case study, we create the configuration shown in Figure 1 and simulate a CubeSat communications system. Rather than using a CubeSat and a ground station, we use computers with accompanying SDRs. This preserves the communications system while removing other factors typical of a full-scale CubeSat mission, such as developing the CubeSat's on-board flight computer necessary to perform all tasks of a mission. We program the radios using GNU Radio, which allows for changes to configuration and different methods of transmission.
+
+Using specifications written in MLTL, we develop a CubeSat communications system that will operate as designed. These specifications are free of poor English that may exist, which could cause varying interpretations from person to person. It's no simple task to design and develop a fully operational CubeSat communications system, let alone define its operation. Aside from discussing which specifications were included and why, we will also go into detail on why they're written as they are, what lessons were learned during their development as well as the length of time it took to create and refine them.
+
+We design a system to automatically broadcast simulated telemetry from the transmitting antenna to the receiving antenna, with R2U2 embedded into the receiver system. Upon receiving telemetry and information from the ground station, R2U2 rapidly verifies that the system variables measured indicate nominal performance. The tool outputs its results upon each run, indicating whether or not the system is operating properly. If R2U2 determines that the system is operating poorly, then the tool will flag the time step at which the system failed, as well as let the user know how it failed. These results, compounded over time, allow us to understand how the entire system performs. 
+
+%We find that specifying the system (in and of itself a time-consuming activity) in MLTL better informs the overall design of the system, as well as ensures that such specifications don't suffer from misinterpretations in language. Mathematical definitions of these specifications can only be interpreted in a single way. Running R2U2 with the system specifications allows us to identify potential problems with our design and and helps us better understand where system issues lie.
+
+%Future work: we want to explore the use of R2U2 with other CubeSat subsystems, such as EPS and ADCS systems. Additionaly R2U2 could also be used to examine the telemetry received from the spacecraft, to verify system performance from the ground. This could then argue for embedding R2U2 into the CubeSat itself, to autonomously verify system performance on-board.
+
+\section{Conclusion and Future Work}
+
+In this case study, we explored the benefits that formal methods like specification and runtime verification have for a simulated CubeSat communications system. Good specifications written in MLTL show, in a mathematical way, how designers want the system to perform, while also accounting for the occasional faults that sensors experience. Embedding R2U2 into the receiver software demonstrates how the communications system of a CubeSat project can be autonomously monitored to check for nominal performance. Figure \ref{Overview} shows how R2U2 would be utilized in this manner for a true CubeSat mission. In addition to its regular duties, the ground station computer has R2U2 embedded into the system, constantly checking for received telemetry to compare against the specifications. A communications system like the one shown in Figure \ref{Overview} is typical of CubeSat projects. Implementing R2U2 into the protocol a single time would then be easily repeatable for other missions.
+
+%In addition to the ground station computer performing its duties of radio operation and rotating its antenna, the computer also has R2U2 running, to ensure system specifications are met. This communications system is typical of CubeSat projects, as transmission to or from the CubeSat/ground station usually require encoding (as many CubeSats operate using the AX.25 data link layer protocol), modulation and signal amplification before and after they are transmitted (TX'ed) or received (RX'ed) from their respective antennas \cite{Asundi2013}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+%\centering
+\includegraphics[width=1.0\textwidth]{Fig/InFlight.png}
+\caption{A representation of how formal methods would be applied during the flight stage of a CubeSat mission. Telemetry is sent by the CubeSat and received by the ground station. The telemetry data then gets fed into the Realizable Responsive Unobtrusive Unit (R2U2) tool and the data gets run against the specifications defined by the mission engineers. R2U2 then outputs results describing which specifications were met or not met. The communications system portion references \cite{Asundi2013} and the runtime verification section is derived from \cite{ARS17}.}
+\label{Overview}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+While we were motivated to apply these methods to a communications system due to their high rate of failure, a case could additionally be made to implement them to aid in the design of other CubeSat systems, such as an electrical power system (EPS) and an attitude determination and control system (ADCS). We plan to study these in future works. Such tools would also be useful in evaluating CubeSat telemetry from the ground station, and autonomously verifying whether or not the CubeSat's performance at that time is nominal. In this way, CubeSat performance is more quickly evaluated than what a ground station operator can provide. This is essentially a ground station operator's role however, and for CubeSats there's often an operator present to ensure communication occurs properly. Instead, this makes the argument for embedding R2U2 into the CubeSat itself, and having the CubeSat autonomously verify it's performance. As formal methods have until now never been applied to CubeSat systems, the combination of these two fields presents many interesting ideas for future studies.
+ 
+%CubeSats are getting a lot of attention from multiple research communities due to their cheap price and easy accessibility to space \cite{cubesat101}. Although a CubeSat offers the potential to replace large and complex satellites for various space missions, novel technology requires robust software performance. % Need discussion.
+%This is difficult to implement for these small-scale missions and many failures (either partial or entire missions) have occurred \cite{alanazi2018, Improving2017}. All subsystems of a CubeSat are a combination of hardware and software components built on an embedded system, and so their design needs to consider characteristics such as real-time response, reactivity with other subsystems, minimized software with optimal data processing speeds, safety, reliability and nominal performance in the harsh environment of space. All of these factors, coupled with CubeSat missions having limitations such as relatively low budgets and fast turnaround times, increase the chances of CubeSat mission failure \cite{alanazi2018, Improving2017}.\\
+% Why budget and fast turnabround make mission fail?
+
+%Issues with CubeSat missions take place at all stages, and are very broad in nature \cite{Improving2017}. Flaws in design, workmanship, software, low reliability of hardware -- usually commercial off-the-shelf (COTS) -- components, lack of adequate testing and communications failures are among a few of the many problems experienced with building CubeSats, as is the case for larger satellites \cite{Improving2017}. Even in decent shape, CubeSats can still experience faults, memory leaks, bad data collections, and other issues inherent with embedded systems.\\
+
+%The communications system of a CubeSat -- and any other spacecraft mission for that matter -- is absolutely vital to mission success. While a CubeSat could be powered on properly and collecting data to perform invaluable science, a failure to communicate that information back to the ground makes the entire mission pointless. These systems are crucial to the mission, so good system performance is vital. Communications systems can be rather complex though, and a lack of experience with RF can hinder their design and performance. Failed communications systems are commonplace for CubeSat projects \cite{Improving2017,Langer2016} and one of the leading issues these missions face both now and in the future. Since CubeSat popularity is only expected to grow in the near future \cite{Improving2017}, communications subsystem failures on CubeSats need to be addressed promptly.\\
+
+%To aid in communications system design and performance analysis, we apply formal specification and runtime verification to a non-simplified CubeSat communications system. These techniques stem from the field of formal methods, a set of mathematically rigorous techniques used in the development of software and hardware systems. These techniques have been used in many fields, particularly the aviation industry and in air traffic control systems \cite{GCMTR16,DRR17}, but very sparsely in the CubeSat field except for better understanding of the global positioning system (GPS) and GLObal NAvigation Satellite System (GLONASS) \cite{peng2013}. While CubeSat systems are complex and offer many opportunities for applying these techniques, as of yet nobody has done so. Motivated by the large number of CubeSat failures, particularly due to communications system issues, we provide a reference set of Cubesat communications fault specifications that Cubesat designers can reference in future missions. We elucidate the applications of formal specification of a Cubesat system and its subsystems, creating a distributed hierarchy of specifications and highlighting their complexity. We use formal techniques with an non-simplified Cubesat communications system to evaluate system performance and provide lessons learned for other designers.\\
+
+%Before performing design-time and run-time verification, the system must first be described using specifications. A specification describes the desired performance of some aspect of a system. Since we intend to focus on the CubeSat and ground station communications system, our specifications relate to operations of it. We identify the needs of the communications system, particularly with aspects involving antenna pointing, transmit/receive operations, measurement of parameters during radio operation, and CubeSat communications monitoring, among others. Our specifications are written using Mission-time Linear Temporal Logic (MLTL) \cite{RRS14,LVR19}. MLTL has been used in many industrial case studies \cite{RRS14,GRS14,SRRMMI15,RSI15,SMR15,SMR16,MRS17}, and was the official logic of the 2018 Runtime Verification Benchmark Competition \cite{RVBC2018}. Many specifications from other case studies, in logics such as MTL \cite{AH90} and STL \cite{MN04}, can be represented in MLTL. 
+%We intuitively relate MLTL to LTL and MTL as follows:
+%(1) MLTL formulas are LTL formulas with bounded intervals over temporal operators, and interpreted over finite traces.
+%(2) MLTL formulas are MTL formulas without any unbounded intervals, and interpreted over finite traces.\\
+
+%Since specification is the biggest bottleneck in the design of robust embedded systems \cite{Roz17}, and since formal specification can be a very enlightening activity for the system design process, we treat this as an activity unto itself. 
+
+%For this reason, collecting telemetry from any spacecraft is a necessity.
+%Aside from comprising the data collected from an onboard payload, typical CubeSat telemetry consists of measurements of the power systems, on-board flight computer (FCPU), attitude, determination and control system (ADCS) and communications. Telemetry collection is the system health monitoring that allows operators to understand, to a degree, how the spacecraft is performing.\\
+
+%System health monitoring is useful in that we can know what various sensors on the spacecraft are measuring, but how do we know that those values are correct? How do we know the sensors on the craft are as accurate as the manufacturers say they are? How do we know if the spacecraft is actually operating as intended? Answering these sorts of questions is one of the goals of the field of formal methods. Formal methods are a collection of mathematical techniques used to improve the reliability of systems \cite{Peled2019,Bjrner2014}. While there are many different techniques and tools developed to specify, model and verify certain systems, there have not as yet been any methods or tools developed specifically for CubeSat missions.\\
+
+%In this document, we will demonstrate how formal methods can be used to complement CubeSat telemetry. We will first develop an example set of telemetry parameters that would be considered useful and sought-after information for a general CubeSat mission. For our purposes, we reference several past CubeSat and satellite missions to demonstrate what sort of system measurements are necessary in CubeSat telemetry. Then we will introduce formal specification and demonstrate how these parameters can be written into logic statements that compare the these parameters either against sensor bounds or expected output. A set of sample data collections is then generated, and we use the Realizable Responsive Unobtrusive Unit (R2U2) system health management tool to run this data against those specifications. Following this, we discuss our results and demonstrate the utility of formal specification and verification for CubeSat missions. We conclude by discussing the utility of applying formal methods to CubeSats in order to improve mission reliability and aid CubeSat developers in future mission designs.
+
+%\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%
+\bibliography{References}
+%%%%%%%%%%%%%%%%%%%%%
+
+%==============================================================================%
+\newpage
+\section*{Appendix}
+\input{Appendix}
+%==============================================================================%
+
+\end{document}
+
+%{
+% \section{Nomenclature}
+
+% {\renewcommand\arraystretch{1.0}
+% \noindent\begin{longtable*}{@{}l @{\quad=\quad} l@{}}
+% $A$  & amplitude of oscillation \\
+% $a$ &    cylinder diameter \\
+% $C_p$& pressure coefficient \\
+% $Cx$ & force coefficient in the \textit{x} direction \\
+% $Cy$ & force coefficient in the \textit{y} direction \\
+% c   & chord \\
+% d$t$ & time step \\
+% $Fx$ & $X$ component of the resultant pressure force acting on the vehicle \\
+% $Fy$ & $Y$ component of the resultant pressure force acting on the vehicle \\
+% $f, g$   & generic functions \\
+% $h$  & height \\
+% $i$  & time index during navigation \\
+% $j$  & waypoint index \\
+% $K$  & trailing-edge (TE) nondimensional angular deflection rate
+% \end{longtable*}}
+
+% \section{Introduction}
+
+% CubeSats are getting a lot of attention from many research communities due to their cheap price and easy accessibility to space. Although a CubeSat offers the potential to replace large and complex satellites for various space missions, novel technology requires robust software performance. This is also difficult to implement for these small-scale missions. All subsystems of a CubeSat are a combination of hardware and software components built on an embedded system, and so their design needs to consider characteristics such as real-time response, reactivity with other systems, minimized software with optimal data processing speeds, safety, reliability and nominal performance in the harsh environment of space. All of these factors, coupled with CubeSat missions having relatively low budgets and fast turnaround times, have the potential to greatly increase the rate of CubeSat mission failure \cite{alanazi2018}.
+
+% \section{Procedure for Paper Submission}
+
+% All manuscripts are to be submitted electronically to the ScholarOne Abstracts site created for each conference. The manuscript upload will be enabled several weeks after acceptance notices have been sent. Presenting authors of accepted papers will receive an email with instructions when manuscript submission is open. It is important that presenting authors keep their email addresses up-to- date so they do not miss this notice.
+
+% Before completing manuscript submission, submitters must also select the copyright statement that will appear on the paper, and complete other acknowledgments. It is also necessary to click both the ``Accept'' and ``Save'' buttons to complete a submission. All completed manuscript submission will be confirmed by email. Completed submissions will also have a status of ``Accepted'' at the top of your manuscript submission page.
+
+% All files must be in pdf format. Please be sure that all security settings are removed from the pdf file before uploading to ensure proper processing of your manuscript file.
+
+% \section{General Guidelines}
+
+% The following section outlines general (nonformatting) guidelines to follow, drawn from the original AIAA Manuscript Preparation Kit. These guidelines are applicable to all authors (except as noted), and include information on the policies and practices relevant to the publication of your manuscript.
+
+% \subsection{Publication by AIAA}
+% Your manuscript cannot be published by AIAA if:
+% \begin{enumerate}
+% \item It has been published previously or
+
+% \item The work contains copyright-infringing material or
+
+% \item An appropriate copyright statement has not yet been selected.
+% \end{enumerate}
+
+% \subsection{Paper Review and Visa Considerations}
+
+% It is the responsibility of the author to obtain any required government or company reviews for their papers in advance of publication. Start early to determine if the reviews are required; this process can take several weeks.
+
+% If you plan to attend an AIAA Forum, technical conference or professional development course held in the United States and you require a visa for travel, it is incumbent upon you to apply for a visa with the U.S.~embassy (consular division) or consulate with ample time for processing.  To avoid bureaucratic problems, AIAA strongly suggests that you submit your formal application to U.S.~ authorities a minimum of 120 days in advance of the date of anticipated travel.
+
+% Prospective conference and course attendees requiring a visa to travel to the United States should first contact
+
+% AIAA to request an official letter of invitation. This letter and a copy of the conference call for papers should be presented along with the required documentation to the U.S. consular officials as part of the formal application process.  AIAA cannot directly intervene with the U.S. Department of State, consular offices, or embassies on behalf of individuals applying for visas. A letter of invitation can be requested by completing the Visa Invitation Letter Request Form at \url{https://www.aiaa.org/Secondary.aspx?id=6258} or you may contact the Event Registrar at \url{invitation@aiaa.org} for more information.
+
+% \subsection{Control ID Number vs Paper Number}
+
+% Your paper was assigned a control ID number at the time you submitted your abstract. It is critical that you reference the tracking number and conference name when contacting AIAA regarding your submission. The control ID number is \emph{not} the final AIAA paper number. The paper number, which appears in the format AIAA-20XX-XXXX, will be used to refer to your paper in the program and in any publication format. It will not be assigned until shortly before the conference. \textbf{Do not include a paper number anywhere on your paper, as this number will be stamped automatically in the top right corner of your paper at the time of processing.}
+
+% \subsection{Copyright}
+
+% Before AIAA can print or publish any paper, the copyright information must be completed in the submission system. Failure to complete the electronic form correctly could result in your paper not being published. The following fields must be completed:
+
+% \begin{enumerate}
+% \item Clearance Statement
+% \item Non-Infringement Statement
+% \item Publication Status Statement
+% \item One Copyright Assignment Statement (Select either A, B, C, or D)
+% \end{enumerate}
+
+% Be sure to read the copyright statements carefully. AIAA requires a copyright transfer from the author(s) to AIAA or a license to publish and distribute your material; government authors can assert that the work is in the public domain. If you are not sure which copyright statement to use, contact your legal department. Refer to AIAA’s Rights and Permissions page at \url{www.aiaa.org} for more information; AIAA cannot help you determine which statement to use. Do not include a copyright statement anywhere on your paper. A hard copy of the form is found in the Author Kit for your reference. As you will be completing this form online, you do not need to fill out the hard-copy form. Do not include a copyright statement anywhere on your paper, and do not upload a copyright form with your paper. The correct statement will be stamped automatically at the time of processing.
+
+% \subsection{Submission Deadlines}
+
+% Manuscripts will be accepted for upload to the system from the receipt of the email invitation until the deadline set for the conference. You will be notified of the specific manuscript submission deadline in your acceptance letter, and the deadline will also be listed on the conference web page at AIAA. Please do not upload a draft version of your manuscript with the intent to upload a final version later. \textbf{Please review your manuscript very carefully before completing your submission to ensure that your paper is complete and final in all respects. Once the manuscript deadline has passed you will be locked out of the manuscript site so it is critical that you upload a final, carefully proofed document.}
+
+% Online conference proceedings will be made accessible to attendees who have registered for the ``full conference'' when the conference opens. Once the proceedings are published online, the conference papers will be considered the version of record and may not be removed or replaced. Changes to published papers can be made available through the Crossmark feature, where corrections and updates are accessed by clicking the Crossmark icon available on every paper published in Aerospace Research Central.
+
+% The opportunity to submit Crossmark updates will be provided to presenting authors starting the first day of the conference through 2000 hrs/8 pm Eastern Time, seven business days after the last day of the conference.  The proceedings will be updated with Crossmark updates shortly after that date.  
+
+% AIAA will NOT accept changes and/or change requests that solely correct grammatical errors, spelling errors, or errors in formatting.  All corrections should be for editorially significant changes where the change affects interpretation or crediting of the work.
+
+% To ensure conference quality, session chairs will enforce a ``no paper, no podium'' rule. This policy is intended to eliminate no-shows, to improve the quality of the conference for all participants, and to ensure that the published proceedings accurately represent the presentations made at a conference.
+
+% \section{Detailed Formatting Instructions}
+
+% The styles and formats for the AIAA Papers Template have been incorporated into the structure of this document. If you are using \LaTeX{}, please use this template to prepare your manuscript. A Microsoft Word template is also available from AIAA's website if you prefer to use Microsoft Word 2001 or later. Regardless of which program you use to prepare your manuscript, please use the formatting instructions contained in this document as a guide.
+
+% If you are using the AIAA Meeting Papers \LaTeX{} Template file to prepare your manuscript, you can simply type your own text over sections of this document, or cut and paste from another document and use the available markup styles. If you choose to cut and paste, select the text from your original document and choose Edit>Copy. (Do not select your title and author information, since the document spacing may be affected. It is a simple task to reenter your title and author information in the template.) Open the \LaTeX{} template file. Place your cursor in the text area of the template and select Edit>Paste. Please note that special formatting (e.g., subscripts, superscripts, italics) may be lost when you copy your text into the template. Use italics for emphasis; do not underline. Use the compiled \LaTeX{} pdf to see the most accurate representation of how your final paper will appear.
+
+% \subsection{Document Text}
+% The default font for AIAA papers is Times New Roman, 10-point size.  The first line of every paragraph should be indented, and all lines should be single-spaced. Default margins are 1'' on all sides. In the electronic version of this template, all margins and other formatting is preset. There should be no additional lines between paragraphs.
+
+% \begin{quoting}
+% Extended quotes, such as this example, are to be used when material being cited is longer than a few sentences, or the standard quotation format is not practical. In this \LaTeX template, the appropriate command environment is \verb|\begin{quoting}...\end{quoting}|. Extended quotes are to be in Times New Roman, 9-point font, indented 0.4'' and full justified.
+% \end{quoting}
+
+% \emph{NOTE:} If you are using the electronic \LaTeX{} template to format your manuscript, the required spacing and formatting will be applied automatically.
+
+% \subsection{Headings}
+% The title of your paper should be typed in bold, 24-point type, with capital and lower-case letters, and centered at the top of the page. The names of the authors, business or academic affiliation, city, and state/province should follow on separate lines below the title. The names of authors with the same affiliation can be listed on the same line above their collective affiliation information. Author names are centered, and affiliations are centered and in italic type immediately below the author names. The affiliation line for each author is to include that author’s city, state, and zip/postal code (or city, province, zip/postal code and country, as appropriate). The first-page footnotes (lower left-hand side) contain the job title and department name, street address/mail stop, and AIAA member grade for each author. Author email addresses may be included also.
+
+% Major headings (``sections'' in the \LaTeX{} template commands) are bold 11-point font, centered, and numbered with Roman numerals.
+
+% Subheadings (``subsections'' in the \LaTeX{} template commands) are bold, flush left, and numbered with capital letters. 
+
+% Sub-Subheadings (``subsubsections'' in the \LaTeX{} template commands) are italic, flush left, and numbered (1. 2. 3. etc.)
+
+
+% \subsection{Abstract}
+% The abstract should appear at the beginning of your paper. It should be one paragraph long (not an introduction) and complete in itself (no reference numbers). It should indicate subjects dealt with in the paper and state the objectives of the investigation. Newly observed facts and conclusions of the experiment or argument discussed in the paper must be stated in summary form; readers should not have to read the paper to understand the abstract. The abstract should be bold, indented 3 picas (1/2'') on each side, and separated from the rest of the document by blank lines above and below the abstract text..
+
+% \subsection{Nomenclature}
+% Papers with many symbols may benefit from a nomenclature list that defines all symbols with units, inserted between the abstract and the introduction. If one is used, it must contain all the symbology used in the manuscript, and the definitions should not be repeated in the text. In all cases, identify the symbols used if they are not widely recognized in the profession. Define acronyms in the text, not in the nomenclature.
+
+% \subsection{Footnotes and References}
+% Footnotes, where they appear, should be placed above the 1'' margin at the bottom of the page. To insert footnotes into the template, use the Insert>Footnote feature from the main menu as necessary. Numbered footnotes as formatted automatically in the template are acceptable, but superscript  symbols are the preferred AIAA style, *, $\dag$, $\ddag$, \S, \P, **, $\dag\dag$, $\ddag\ddag$, \S\S, etc.
+
+% List and number all references at the end of the paper. Corresponding bracketed numbers are used to cite references in the text \cite{vatistas1986reverse}, including citations that are an integral part of the sentence (e.g., ``It is shown in \cite{dornheim1996planetary} that\ldots '') or follow a mathematical expression: ``$A^{2} + B = C$ (Ref.~\cite{terster1997nasa}).'' For multiple citations, separate reference numbers with commas \cite{peyret2012computational,oates1997aerothermodynamics}, or use a dash to show a range \cite{volpe1994techniques,thompsonspacecraft,chi1993fluid,brandis2016nonequi}. Reference citations in the text should be in numerical order.
+
+% In the reference list, give all authors' names; do not use ``et al.''. Papers that have not been published should be cited as ``unpublished''; papers that have been submitted or accepted for publication should be cited as ``submitted for publication.'' Private communications and personal website should appear as footnotes rather than in the reference list.
+
+% References should be cited according to the standard publication reference style (for examples, see the ``References'' section of this template). Never edit titles in references to conform to AIAA style of spellings, abbreviations, etc. Names and locations of publishers should be listed; month and year should be included for reports and papers. For papers published in translation journals, please give the English citation first, followed by the original foreign language citation.
+
+% \subsection{Images, Figures and Tables}
+% All artwork, captions, figures, graphs, and tables will be reproduced exactly as submitted. Be sure to position any figures, tables, graphs, or pictures as you want them printed. AIAA will not be responsible for incorporating your figures, tables, etc. (Company logos and identification numbers are not permitted on your illustrations.)
+
+% Do not insert your tables and figures in text boxes. Figures should have no background, borders, or outlines. In the \LaTeX{} template, use the ``caption'' command to type caption text. Captions are bold with a single tab (no hyphen or other character) between the figure number and figure description.
+
+% % \begin{table}
+% % \caption{\label{tab:table1} Transitions selected for thermometry}
+% % \centering
+% % \begin{tabular}{lcccccc}
+% % \hline
+% % & Transition& & \multicolumn{2}{c}{}\\\cline{2-2}
+% % Line& $\nu''$& & $J'' $& Frequency, cm$^{-1}$& $FJ$, cm$^{-1}$& $G\nu $, cm$^{-1}$\\\hline
+% % a& 0& P$_{12}$& 2.5& 44069.416& 73.58& 948.66\\
+% % b& 1& R$_{2}$& 2.5& 42229.348& 73.41& 2824.76\\
+% % c& 2& R$_{21}$& 805& 40562.179& 71.37& 4672.68\\
+% % d& 0& R$_{2}$& 23.5& 42516.527& 1045.85& 948.76\\
+% % \hline
+% % \end{tabular}
+% % \end{table}
+
+
+% \begin{figure}[hbt!]
+% \centering
+% \includegraphics[width=.5\textwidth]{graph}
+% \caption{Magnetization as a function of applied fields.}
+% \end{figure}
+
+% Place figure captions below all figures; place table titles above the tables. If your figure has multiple parts, include the labels ``a),'' ``b),'' etc. below and to the left of each part, above the figure caption. Please verify that the figures and tables you mention in the text actually exist. \emph{Please do not include captions as part of the figures, and do not put captions in separate text boxes linked to the figures.} When citing a figure in the text, use the abbreviation ``Fig.'' except at the beginning of a sentence. Do not abbreviate ``Table.'' Number each different type of illustration (i.e., figures, tables, images) sequentially with relation to other illustrations of the same type.
+
+% Figure axis labels are often a source of confusion. Use words rather than symbols. As in the example to the right, write the quantity ``Magnetization'' rather than just ``M.'' Do not enclose units in parenthesis, but rather separate them from the preceding text by commas. Do not label axes only with units. As in Fig.~1, for example, write ``Magnetization, \si[per-mode=symbol]{\ampere\per\meter},'' not just ``A/m.'' Do not label axes with a ratio of quantities and units. For example, write ``Temperature, K,'' not ``Temperature/K.''
+
+% Multipliers can be especially confusing. Write ``Magnetization, \si[per-mode=symbol]{\kilo\ampere\per\meter}'' or ``Magnetization, \SI[per-mode=symbol]{e3}{\ampere\per\meter}.'' Do not write ``Magnetization (A/m) x 1000'' because the reader would not then know whether the top axis label in Fig.~1 meant 16000 A/m or 0.016 A/m. Figure labels must be legible, and all text within figures should be uniform in style and size, no smaller than 8-point type.
+
+% \subsection{Equations, Numbers, Symbols, and Abbreviations}
+% Equations are numbered consecutively, with equation numbers in parentheses flush right, as in Eq.~\eqref{sample:equation}. Insert a blank line above and below the equation. To insert an equation into the \LaTeX{} document, use the \verb|\begin{equation}...\end{equation}| command environment.
+
+% A sample equation is included here, formatted using the preceding instructions. To make your equation more compact, you can use the solidus (/), the exp function, or appropriate exponents. Use parentheses to avoid ambiguities in denominators.
+
+% \begin{equation}
+% \label{sample:equation}
+% \int^{r_2}_0 F(r,\varphi){\rm d}r\,{\rm d}\varphi = [\sigma r_2/(2\mu_0)]\int^{\infty}_0\exp(-\lambda|z_j-z_i|)\lambda^{-1}J_1 (\lambda r_2)J_0 (\lambda r_i\,\lambda {\rm d}\lambda)
+% \end{equation}
+
+% Be sure that the symbols in your equation are defined before the equation appears, or immediately following. Italicize symbols ($T$ might refer to temperature, but T is the unit tesla). Refer to ``Eq.~(1),'' not ``(1)'' or ``equation (1)'' except at the beginning of a sentence: ``Equation (1) is\ldots'' Equations can be labeled other than ``Eq.'' should they represent inequalities, matrices, or boundary conditions. If what is represented is really more than one equation, the abbreviation ``Eqs.'' can be used.
+
+% Define abbreviations and acronyms the first time they are used in the text, even after they have already been defined in the abstract. Very common abbreviations such as AIAA, SI, ac, and dc do not have to be defined. Abbreviations that incorporate periods should not have spaces: write ``P.R.,'' not ``P.~R.'' Delete periods between initials if the abbreviation has three or more initials; e.g., U.N.~but ESA. Do not use abbreviations in the title unless they are unavoidable (for instance, ``AIAA'' in the title of this article).
+
+% \subsection{General Grammar and Preferred Usage}
+% Use only one space after periods or colons. Hyphenate complex modifiers: ``zero-field-cooled magnetization.'' Avoid dangling participles, such as, ``Using Eq.~(1), the potential was calculated.'' [It is not clear who or what used Eq.~(1).] Write instead ``The potential was calculated using Eq.~(1),'' or ``Using Eq.~(1), we calculated the potential.''
+
+% Insert a zero before decimal points: ``0.25,'' not ``.25.'' Use ``\si{\centi\meter\squared}'' not ``cc.'' Indicate sample dimensions as ``$\SI{0.1}{\centi\meter} \times \SI{0.2}{\centi\meter}$,'' not ``$0.1 \times \SI{0.2}{\centi\meter\squared}$.'' The preferred abbreviation for ``seconds'' is ``s,'' not ``sec.'' Do not mix complete spellings and abbreviations of units: use ``\si[per-mode=symbol]{\weber\per\meter\squared}'' or ``webers per square meter,'' not ``webers/m$^2$.'' When expressing a range of values, write ``7 to 9'' or ``7--9,'' not ``7$\sim$9.''
+
+% A parenthetical statement at the end of a sentence is punctuated outside of the closing parenthesis (like this). (A parenthetical sentence is punctuated within parenthesis.) In American English, periods and commas are placed within quotation marks, like ``this period.'' Other punctuation is ``outside''! Avoid contractions; for example, write ``do not'' instead of ``don’t.'' The serial comma is preferred: ``A, B, and C'' instead of ``A, B and C.''
+
+% If you wish, you may write in the first person singular or plural and use the active voice (``I observed that\ldots'' or ``We observed that\ldots'' instead of ``It was observed that\ldots''). Remember to check spelling. If your native language is not English, please ask a native English-speaking colleague to proofread your paper.
+
+% Be aware of the different meanings of the homophones ``affect'' (usually a verb) and ``effect'' (usually a noun), ``complement'' and ``compliment,'' ``discreet'' and ``discrete,'' ``principal'' (e.g., ``principal investigator'') and ``principle'' (e.g., ``principle of measurement''). Do not confuse ``imply'' and ``infer.''
+
+% The word ``data'' is plural, not singular (i.e., ``data are,'' not ``data is''). The subscript for the permeability of vacuum $\mu_0$ is zero, not a lowercase letter ``o.'' The term for residual magnetization is ``remanence''; the adjective is ``remanent''; do not write ``remnance'' or ``remnant.'' The word ``micrometer'' is preferred over ``micron'' when spelling out this unit of measure. A graph within a graph is an ``inset,'' not an ``insert.'' The word ``alternatively'' is preferred to the word ``alternately'' (unless you really mean something that alternates). Use the word ``whereas'' instead of ``while'' (unless you are referring to simultaneous events). Do not use the word ``essentially'' to mean ``approximately'' or ``effectively.'' Do not use the word ``issue'' as a euphemism for ``problem.'' When compositions are not specified, separate chemical symbols by en-dashes; for example, ``NiMn'' indicates the intermetallic compound \ce{Ni_{0.5}Mn_{0.5}} whereas ``Ni--Mn'' indicates an alloy of some composition \ce{Ni_{x}Mn_{1-x}}.
+
+% Be aware of the different meanings of the homophones ``affect'' (usually a verb) and ``effect'' (usually a noun), ``complement'' and ``compliment,'' ``discreet'' and ``discrete,'' ``principal'' (e.g., ``principal investigator'') and ``principle'' (e.g., ``principle of measurement''). Do not confuse ``imply'' and ``infer.''
+
+% Prefixes such as ``non,'' ``sub,'' ``micro,'' ``multi,'' and ``"ultra'' are not independent words; they should be joined to the words they modify, usually without a hyphen. There is no period after the ``et'' in the abbreviation ``et al.'' The abbreviation ``i.e.,'' means ``that is,'' and the abbreviation ``e.g.,'' means ``for example'' (these abbreviations are not italicized).
+
+
+% \section{Conclusion}
+% A conclusion section is not required, though it is preferred. Although a conclusion may review the main points of the paper, do not replicate the abstract as the conclusion. A conclusion might elaborate on the importance of the work or suggest applications and extensions. \textit{Note that the conclusion section is the last section of the paper that should be numbered. The appendix (if present), acknowledgment, and references should be listed without numbers.}
+
+
+% \section*{Appendix}
+
+% An Appendix, if needed, should appear before the acknowledgments.
+
+% \section*{Acknowledgments}
+% An Acknowledgments section, if used, \textbf{immediately precedes} the References. Sponsorship information and funding data are included here. The preferred spelling of the word ``acknowledgment'' in American English is without the ``e'' after the ``g.'' Avoid expressions such as ``One of us (S.B.A.) would like to thank\ldots'' Instead, write ``F.~A.~Author thanks\ldots'' Sponsor and financial support acknowledgments are also to be listed in the ``acknowledgments'' section.
+
+% \bibliography{References}
