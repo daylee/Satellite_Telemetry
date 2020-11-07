@@ -1,7 +1,7 @@
 \documentclass[conf]{new-aiaa}
 %\documentclass[journal]{new-aiaa} for journal papers
 \usepackage[utf8]{inputenc}
-
+\usepackage{comment}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage[version=4]{mhchem}
@@ -40,32 +40,74 @@ Abstract Placeholder.
 
 Over the past decade, the use of small satellites (hereafter referred to as CubeSats) by academic, governmental, commercial and amateur entities has grown drastically \cite{cubesat101,Poghosyan2016,Villela2019}. The relatively low cost and fast turnaround times of these projects make CubeSats ideal platforms for accessing and experimenting in space \cite{cubesat101}. As of June 2020, over 1,300 CubeSats have been launched into space \cite{Kulu2020}. While CubeSats are limited in scope and should not be considered replacements for flagship missions built by agencies such as NASA and ESA, their use is only expected to rise in the coming years \cite{Improving2017,cubesat101}. The low cost and short production times for these missions are appealing to developers, but they also act as constraints for these projects. CubeSats may offer a scaled-down, simplified platform for developers, but they still experience many of the same problems that large satellites do \cite{Improving2017}. Flaws in design, workmanship, software, low reliability of hardware (often consisting of commercial off-the-shelf (COTS) components), lack of adequate testing and communications failures are among a few of the many problems experienced with CubeSat projects \cite{Improving2017}. Many of these issues can be attributed to the cost and time constraints, such as parts quality, testing and design flaws. Other problems are inherent with spacecraft projects, and will be faced by developers no matter the cost or time spent working on the mission.
 
-\cite{Klofas2008}
+%%%%%%%%%%%%%%%%%%%%%
+\section{Model of Communications System}
+%%%%%%%%%%%%%%%%%%%%%
+
+We created, tested and evaluated a model of a CubeSat communications system for the work described in this case study. This model was created using Matlab and Simulink as well as a software-defined radio (SDR). In the subsections below, we discuss the two major components of this model in-depth.
+
+\subsection{Orbital Simulation}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.7\textwidth]{Fig/CubeSatModelScreenshot.png}
+\caption{A screen capture of the CubeSat Orbit Animation window from the Aerospace Blockset CubeSat Simulation Library. This image shows the CubeSat within line-of-sight of the proscribed virtual ground station located in Ames, Iowa.}
+\label{OrbitalAnimation}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.9\textwidth]{Fig/SimulinkDataScreenshot.png}
+\caption{A screen capture of the datasets recorded during the orbital simulation. The first dataset represents when the SNR is large enough that connection between the CubeSat and ground station is established. The second data represents how much data is downlinked using a 9600 baud rate. The third dataset represents when there's line-of-sight (LOS) between the CubeSat and the ground station. The fourth dataset counts the number of orbits during the simulation period.}
+\label{OrbitalDatasets}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Radio Communications}
 
 %%%%%%%%%%%%%%%%%%%%%
 \section{Application of Formal Methods}
 %%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%
 \subsection{Specification}
-%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Runtime Verification}
 
-\section{Expected Results}
+\section{Results}
 
 %%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion and Future Work}
 %%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=1\textwidth]{Fig/InFlight_Overview.png}
+\caption{A representation of how runtime verification fits into a real CubeSat mission's communications system. The CubeSat measures system values and saves them for transmission. The telemtry information is then encoded, modulated, amplified and downlinked to the ground station. After a similar decoding process, the telemetry variables are checked against their specifications using the R2U2 tool. For an actual mission, this would consist of an online process wherein R2U2 is run each time the ground station receives a new set of telemetry. The communications system portion references \cite{Asundi2013} and the runtime verification section is derived from \cite{ARS17}.}
+\label{CubeSatRVDiagram}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%
+\newpage
 \bibliography{References}
 %%%%%%%%%%%%%%%%%%%%%
 
 %==============================================================================%
-\newpage
-\section*{Appendix}
-\input{Appendix}
+%\newpage
+%\section*{Appendix}
+%\input{Appendix}
 %==============================================================================%
 
 \end{document}
