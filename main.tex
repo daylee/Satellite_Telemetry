@@ -44,11 +44,11 @@ Over the past decade, the use of small satellites (hereafter referred to as Cube
 \section{Model of Communications System}
 %%%%%%%%%%%%%%%%%%%%%
 
-We created, tested and evaluated a model of a CubeSat communications system for the work described in this case study. This model was created using Matlab and Simulink as well as a software-defined radio (SDR). In the subsections below, we discuss the two major components of this model in-depth.
+We created, tested and evaluated a model of a CubeSat communications system for the work described in this case study. This model was created using Matlab and Simulink as well as a software-defined radio (SDR). In the subsections below, we discuss the three major components of this model in-depth.
 
 \subsection{Orbital Simulation}
 
-
+We utilize the MathWorks Aerospace Blockset CubeSat Simulation Library in Matlab/Simulink to develop a simulated CubeSat orbiting the Earth. This library provides a robust set of functionality that can be used to model, simulate and analyze the orbital motion and dynamics of CubeSats and nano satellites \cite{AerospaceBlockset}. The CubeSat Vehicle Model block diagram provided by the library is able to perform this simulation once a specified set of Keplerian orbital parameters (eccentricity, semi-major axis, inclination, right ascension of the ascending node, etc.) are passed to it. An orbital model of a CubeSat vehicle is then generated according to these parameters and placed into a spherical harmonic gravitation model representing Earth's gravity. When the Simulink model is run using an ordinary differential equations (ODE) solver, it outputs the position and velocity of the craft at the next time step, along with quaternion values. This movement is animated using the Simulink 3D Animation block, as shown in Figure \ref{OrbitalAnimation} and then the process is repeated with the new position and velocity values.\\
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -60,6 +60,37 @@ We created, tested and evaluated a model of a CubeSat communications system for 
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The values we used for our simulation are shown in Table \ref{OrbitalParameters}. The simulation time is chosen to be one week in order to provide a decently long time interval with many orbital passes, while also being reasonable for computation time. All values shown in this table, aside from the Earth's radius, the eccentricity and the location of the ground station, are chosen purely out of experimentation. This portion of the model serves to provide us with orbital information -- as well as a visualization -- of a user-defined CubeSat mission rather than building and launching a physical craft. It is important to note that any Earth-orbiting CubeSat orbit could be used for this project, provided that orbit brings it close to the location of a virtual ground station.
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Parameter}         & \textbf{Value} \\ \hline
+Radius of Earth (km)       & 6378.137       \\ \hline
+Avg. Radius of Orbit (km)  & 7078.137       \\ \hline
+Eccentricity               & 0              \\ \hline
+Inclination (deg)          & 51.6           \\ \hline
+RA of Ascending Node (deg) & 0              \\ \hline
+Argument of Perigee (deg)  & 0              \\ \hline
+True Anomaly (deg)         & 0              \\ \hline
+GS Latitude (deg)          & 42.0236        \\ \hline
+GS Longitude (deg)         & -93.6528       \\ \hline
+\end{tabular}
+\vspace{2 mm}
+\caption{Parameters of the simulated CubeSat orbit and location of ground station.}
+\label{OrbitalParameters}
+\end{table}
+
+With the position and velocity of the CubeSat calculated during this period, we then simulate its interaction with a virtual ground station. We choose the location of the ground station to be 42.0236$^{\circ}$ and -93.6528$^{\circ}$ as described in Table \ref{OrbitalDatasets}. This location roughly corresponds to the location of a real ground station located at Iowa State University. While we have chosen this particular location, just about any position on Earth could serve as the location for this virtual station. We also note that the simulation assumes sea-level altitude for the ground station's position.\\
+
+We next use output from the orbital simulation blocks along with the ground station position to determine if line-of-sight (LOS) between the CubeSat and ground station is achieved at each time step. Using the satellite position vector, and ground station position vector in the Earth-centered, Earth-fixed (ECEF) frame along with the ECEF to CubeSat Body quaternion, we calculate the azimuth and elevation of the CubeSat with respect to the ground station. We can then determine whether or not LOS is achieved between the CubeSat and the ground station by monitoring only the calculated elevation angle. A binary representation of when the CubeSat and ground station are in LOS is shown in the third plot of Figure \ref{OrbitalDatasets}. At this point, we now have all of the orbital information necessary to proceed with developing simulated communications between the CubeSat and ground station.
+
+\subsection{Communications Simulation}
+
+In the typical design of a real CubeSat communications system, developers perform link budget calculations to determine several properties in their communications system. These calculations 
+aid in understanding the gain and power requirements for the transmitting and receiving antennas of the system and are a primary factor in determining what kind of antenna is used to transmit data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
