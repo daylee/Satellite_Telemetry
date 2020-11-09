@@ -1,3 +1,59 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%This section contains all of the appendices included in the manuscript.
+
+\subsection{Orbital Simulation Data Values}
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Parameter}         & \textbf{Value} \\ \hline
+Radius of Earth (km)       & 6378.137       \\ \hline
+Avg. Radius of Orbit (km)  & 7078.137       \\ \hline
+Eccentricity               & 0              \\ \hline
+Inclination (deg)          & 51.6           \\ \hline
+RA of Ascending Node (deg) & 0              \\ \hline
+Argument of Perigee (deg)  & 0              \\ \hline
+True Anomaly (deg)         & 0              \\ \hline
+GS Latitude (deg)          & 42.0236        \\ \hline
+GS Longitude (deg)         & -93.6528       \\ \hline
+\end{tabular}
+\vspace{2 mm}
+\caption{Parameters of the simulated CubeSat orbit and location of ground station.}
+\label{OrbitalParameters}
+\end{table}
+
+\subsection{Antenna Design Parameters}
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Parameter}          & \textbf{Value}                      \\ \hline
+Length (m)                  & 0.0397                              \\ \hline
+Width (m)                   & 0.0397                              \\ \hline
+StripLineWidth (m)          & 0.0025                              \\ \hline
+NotchLength (m)             & 0.0059                              \\ \hline
+NotchWidth (m)              & 0.0044                              \\ \hline
+PatchCenter {[}m,m,m{]}     & {[}0,0,0{]}                         \\ \hline
+FeedLocation {[}m,m,m{]}    & {[}-0.0441,0,0.0022{]}              \\ \hline
+Height(m)                   & 0.0022                              \\ \hline
+GroundPlaneLength (m)       & 0.0882                              \\ \hline
+GroundPlaneWidth (m)        & 0.0882                              \\ \hline
+PatchCenterOffset {[}m,m{]} & {[}0,0{]}                           \\ \hline
+FeedOffset {[}m,m{]}        & {[}-0.0441,0{]}                     \\ \hline
+Substrate                   & 1x1 dielectric {[}default values{]} \\ \hline
+SubstrateThickness (m)                   & 0.00220435630882353 \\ \hline
+Tilt                        & 0                                   \\ \hline
+TiltAxis                    & {[}1,0,0{]}                         \\ \hline
+\end{tabular}
+\vspace{2 mm}
+\caption{Design Parameters of the Microstrip Patch Antenna used in developing the communications system model.}
+\label{AntennaParameters}
+\end{table}
+
+
+\begin{comment}
 \subsection{Sample Telemetry}
 
 \begin{lstlisting}
@@ -138,3 +194,4 @@ the desired current value, 1.5VSbExp."\\
     \label{Spec 1}
     G_{[0,M]} \{(\varphi_1 \wedge \psi_1) \wedge (\varphi_2 \wedge \psi_2) \wedge (\varphi_3 \wedge \psi_3)\}
 \end{equation} \\
+\end{comment}

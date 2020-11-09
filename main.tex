@@ -63,34 +63,24 @@ We utilize the MathWorks Aerospace Blockset CubeSat Simulation Library in Matlab
 
 The values we used for our simulation are shown in Table \ref{OrbitalParameters}. The simulation time is chosen to be one week in order to provide a decently long time interval with many orbital passes, while also being reasonable for computation time. All values shown in this table, aside from the Earth's radius, the eccentricity and the location of the ground station, are chosen purely out of experimentation. This portion of the model serves to provide us with orbital information -- as well as a visualization -- of a user-defined CubeSat mission rather than building and launching a physical craft. It is important to note that any Earth-orbiting CubeSat orbit could be used for this project, provided that orbit brings it close to the location of a virtual ground station.
 
-\begin{table}[!h]
-\centering
-\begin{tabular}{|l|l|}
-\hline
-\textbf{Parameter}         & \textbf{Value} \\ \hline
-Radius of Earth (km)       & 6378.137       \\ \hline
-Avg. Radius of Orbit (km)  & 7078.137       \\ \hline
-Eccentricity               & 0              \\ \hline
-Inclination (deg)          & 51.6           \\ \hline
-RA of Ascending Node (deg) & 0              \\ \hline
-Argument of Perigee (deg)  & 0              \\ \hline
-True Anomaly (deg)         & 0              \\ \hline
-GS Latitude (deg)          & 42.0236        \\ \hline
-GS Longitude (deg)         & -93.6528       \\ \hline
-\end{tabular}
-\vspace{2 mm}
-\caption{Parameters of the simulated CubeSat orbit and location of ground station.}
-\label{OrbitalParameters}
-\end{table}
-
-With the position and velocity of the CubeSat calculated during this period, we then simulate its interaction with a virtual ground station. We choose the location of the ground station to be 42.0236$^{\circ}$ and -93.6528$^{\circ}$ as described in Table \ref{OrbitalDatasets}. This location roughly corresponds to the location of a real ground station located at Iowa State University. While we have chosen this particular location, just about any position on Earth could serve as the location for this virtual station. We also note that the simulation assumes sea-level altitude for the ground station's position.\\
+With the position and velocity of the CubeSat calculated during this period, we then simulate its interaction with a virtual ground station. We choose the location of the ground station to be 42.0236$^{\circ}$ and -93.6528$^{\circ}$ as described in Table \ref{OrbitalDatasets} in the Appendix. This location roughly corresponds to the location of a real ground station located at Iowa State University. While we have chosen this particular location, just about any position on Earth could serve as the location for this virtual station. We also note that the simulation assumes sea-level altitude for the ground station's position.\\
 
 We next use output from the orbital simulation blocks along with the ground station position to determine if line-of-sight (LOS) between the CubeSat and ground station is achieved at each time step. Using the satellite position vector, and ground station position vector in the Earth-centered, Earth-fixed (ECEF) frame along with the ECEF to CubeSat Body quaternion, we calculate the azimuth and elevation of the CubeSat with respect to the ground station. We can then determine whether or not LOS is achieved between the CubeSat and the ground station by monitoring only the calculated elevation angle. A binary representation of when the CubeSat and ground station are in LOS is shown in the third plot of Figure \ref{OrbitalDatasets}. At this point, we now have all of the orbital information necessary to proceed with developing simulated communications between the CubeSat and ground station.
 
 \subsection{Communications Simulation}
 
-In the typical design of a real CubeSat communications system, developers perform link budget calculations to determine several properties in their communications system. These calculations 
-aid in understanding the gain and power requirements for the transmitting and receiving antennas of the system and are a primary factor in determining what kind of antenna is used to transmit data.
+In the typical design of a real CubeSat communications system, developers perform link budget calculations to determine several properties in their communications system. These calculations aid in understanding the gain and power requirements for the transmitting and receiving antennas of the system and are a primary factor in determining what kind of antenna is used to transmit data. Because we are simulating a communications system, we model the antenna directly with a chosen transmission frequency, and then calculate when a specified signal-to-noise ratio is achieved during periods of LOS.\\
+
+Using the Mathworks Antenna Toolbox, we model a microstrip patch antenna, popular with developers due to their compact size and efficiency. The transmission frequency is chosen to be 3.4 GHz in the S-band, which is currently a popular band for developers interested in downlinking relatively large amounts of data. A handful of additional parameters for this antenna are described in Table \ref{AntennaParameters}. From these parameters, we generate a table of gain values that is used in the link equation calculation.\\
+
+In addition to determining connection between the CubeSat and ground station, the model calculates the signal-to-noise ratio during these connection periods to determine whether data can be downlinked to the ground station. This is done using the traditional form of the link equation, which relates all necessary parameters in a communication system including but not limited to, data rate, antenna size, propagation path length, and transmitter power \citep{Wertz1999}. The link equation is shown in Equation \ref{LinkEquation}.
+
+\begin{equation}
+\frac{E_b}{N_o} = \frac{P * L_l * G_t * L_s * L_a * G_r}{k * T_s * R}
+\label{LinkEquation}
+\end{equation}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -136,9 +126,9 @@ aid in understanding the gain and power requirements for the transmitting and re
 %%%%%%%%%%%%%%%%%%%%%
 
 %==============================================================================%
-%\newpage
-%\section*{Appendix}
-%\input{Appendix}
+\newpage
+\section*{Appendix}
+\input{Appendix}
 %==============================================================================%
 
 \end{document}
