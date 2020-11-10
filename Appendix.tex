@@ -32,24 +32,53 @@ GS Longitude (deg)         & -93.6528       \\ \hline
 \textbf{Parameter}          & \textbf{Value}                      \\ \hline
 Length (m)                  & 0.0397                              \\ \hline
 Width (m)                   & 0.0397                              \\ \hline
-StripLineWidth (m)          & 0.0025                              \\ \hline
-NotchLength (m)             & 0.0059                              \\ \hline
-NotchWidth (m)              & 0.0044                              \\ \hline
-PatchCenter {[}m,m,m{]}     & {[}0,0,0{]}                         \\ \hline
-FeedLocation {[}m,m,m{]}    & {[}-0.0441,0,0.0022{]}              \\ \hline
+Strip Line Width (m)          & 0.0025                              \\ \hline
+Notch Length (m)             & 0.0059                              \\ \hline
+Notch Width (m)              & 0.0044                              \\ \hline
+Patch Center {[}m,m,m{]}     & {[}0,0,0{]}                         \\ \hline
+Feed Location {[}m,m,m{]}    & {[}-0.0441,0,0.0022{]}              \\ \hline
 Height(m)                   & 0.0022                              \\ \hline
-GroundPlaneLength (m)       & 0.0882                              \\ \hline
-GroundPlaneWidth (m)        & 0.0882                              \\ \hline
-PatchCenterOffset {[}m,m{]} & {[}0,0{]}                           \\ \hline
-FeedOffset {[}m,m{]}        & {[}-0.0441,0{]}                     \\ \hline
+Ground Plane Length (m)       & 0.0882                              \\ \hline
+Ground Plane Width (m)        & 0.0882                              \\ \hline
+Patch Center Offset {[}m,m{]} & {[}0,0{]}                           \\ \hline
+Feed Offset {[}m,m{]}        & {[}-0.0441,0{]}                     \\ \hline
 Substrate                   & 1x1 dielectric {[}default values{]} \\ \hline
-SubstrateThickness (m)                   & 0.00220435630882353 \\ \hline
+Substrate Thickness (m)                   & 0.00220435630882353 \\ \hline
 Tilt                        & 0                                   \\ \hline
-TiltAxis                    & {[}1,0,0{]}                         \\ \hline
+Tilt Axis                    & {[}1,0,0{]}                         \\ \hline
 \end{tabular}
 \vspace{2 mm}
 \caption{Design Parameters of the Microstrip Patch Antenna used in developing the communications system model.}
 \label{AntennaParameters}
+\end{table}
+
+\clearpage
+
+\subsection{Downlink Constant Values}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Parameter}      & \textbf{Value}            \\ \hline
+frequency (Hz)          & 3.4*10\textasciicircum{}9 \\ \hline
+Aperture Efficiency     & 0.0                       \\ \hline
+TX Power (W)            & 10.0                      \\ \hline
+TX Line Loss (dB)       & 0.0                       \\ \hline
+Sky Temperature (K)      & 290                       \\ \hline
+Polarization Loss (dB)   & 3.0                       \\ \hline
+Pointing Error Loss (dB)  & 3.0                       \\ \hline
+LNA Gain (dB)           & 16.0                      \\ \hline
+LNA Noise Figure (dB)   & 1.5                       \\ \hline
+RX Line Loss (dB)       & 3.0                       \\ \hline
+Radio Noise Figure (dB) & 10.0                      \\ \hline
+RX Antenna Gain (dB)    & 18.9                      \\ \hline
+R (baud)                & 9600                      \\ \hline
+Eb\_N0\_required (dB)   & 10                        \\ \hline
+\end{tabular}
+\vspace{2 mm}
+\caption{Constant values used in the link budgeting step of the model.}
+\label{DownlinkParameters}
 \end{table}
 
 
