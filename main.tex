@@ -97,7 +97,13 @@ where E$_{b}$/N$_{o}$ is the ratio of received energy per bit to noise-density, 
 
 \subsection{Radio Communications}
 
-The radio communications portion of the model uses a USRP B210 SDR from Ettus Research to transmit and receive sample telemetry data, as if a CubeSat were transmitting to the ground station. Telemetry is broadcasted to the receiving antenna when the communication status, shown in the the first dataplot of Figure \ref{OrbitalDatasets}, is active. The transmission takes place specifically at each time step where the communication status goes from inactive to active.
+The radio communications portion of the model uses a Universal Software Radio Peripheral (USRP) B210 software-defined radio (SDR) from Ettus Research to perform quaternary phase-shift keying transmission and reception of sample telemetry data, as if a CubeSat were transmitting to the ground station. This portion of the model is built using the MathWorks Communications Toolbox \cite{CommunicationsToolbox}. Telemetry is broadcasted from the transmitting antenna to the receiving antenna when the communication status, shown in the first dataplot of Figure \ref{OrbitalDatasets}, is active. The transmission takes place specifically at each time step where the communication status goes from inactive to active.\\
+
+The sample telemetry is contained within a JSON file, and consists of a struct with a handful of sample system measurements. Each parameter is a typical telemetry variable that would be collected in a real CubeSat mission. This is a simplified version of a typical CubeSat telemetry collection, which may consist of hundreds of parameters. This is possible with our configuration but for our study here, we maintain a simplified version. The sample telemetry is shown in Figure \ref{Telemetry}.\\
+
+When the communications simulation indicates transmission is active, this telemetry message is read into the model and encoded into bits, preceded by a unipolar Barker code. The message then goes through QPSK modulation with a $\pi$/4 phase offset. The signal then goes through a raised cosine transmit filter, which upsamples and filters the input signal to prepare it for transmission. This signal is then sent to the USRP B210 SDR and transmitted at 3.4 GHz like in the model. The receiver, which is constantly listening for a signal throughout the simulation period, acquires it and sends processes it through an automatic gain controller (AGC), a raised cosine receive filter, a coarse frequency compensator, symbol and carrier synchronizers, a preamble detector, a frame synchronizer, and finally a data decoder. This process outputs the telemetry message, which is then organized into a comma-separated variable (CSV) file for later use. Each transmission that is received is appended to this file, so that we have a collection of telemetry messages received through the simulation.\\
+
+
 
 %%%%%%%%%%%%%%%%%%%%%
 \section{Application of Formal Methods}
