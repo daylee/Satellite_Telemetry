@@ -9,6 +9,9 @@
 \usepackage{longtable,tabularx}
 \setlength\LTleft{0pt} 
 \usepackage{listings}
+
+\usepackage{xcolor}
+
 \lstset{basicstyle=\small\ttfamily,columns=flexible,breaklines=true}
 
 \title{A Case Study in Formal Specification and Runtime Verification of a CubeSat Communications System}
@@ -26,7 +29,7 @@
 
 \begin{abstract}
 
-Abstract Placeholder.
+CubeSats are garnering a lot of attention from governmental, commercial and academic research communities due to their cheap price and easy accessibility to space. Although a CubeSat offers the potential to replace large and complex satellites for various space missions, developing a high-integrity platform that can fly in space requires robust software performance. The communications system of a CubeSat -- and any other spacecraft mission for that matter -- is critical to mission success. However, failed communications systems are commonplace for CubeSat projects and are one of the leading issues these missions face both now and in the future.
 
 \end{abstract}
 
@@ -38,7 +41,7 @@ Abstract Placeholder.
 \section{Introduction}
 %%%%%%%%%%%%%%%%%%%%%
 
-Over the past decade, the use of small satellites (hereafter referred to as CubeSats) by academic, governmental, commercial and amateur entities has grown drastically \cite{cubesat101,Poghosyan2016,Villela2019}. The relatively low cost and fast turnaround times of these projects make CubeSats ideal platforms for accessing and experimenting in space \cite{cubesat101}. As of June 2020, over 1,300 CubeSats have been launched into space \cite{Kulu2020}. While CubeSats are limited in scope and should not be considered replacements for flagship missions built by agencies such as NASA and ESA, their use is only expected to rise in the coming years \cite{Improving2017,cubesat101}. The low cost and short production times for these missions are appealing to developers, but they also act as constraints for these projects. CubeSats may offer a scaled-down, simplified platform for developers, but they still experience many of the same problems that large satellites do \cite{Improving2017}. Flaws in design, workmanship, software, low reliability of hardware (often consisting of commercial off-the-shelf (COTS) components), lack of adequate testing and communications failures are among a few of the many problems experienced with CubeSat projects \cite{Improving2017}. Many of these issues can be attributed to the cost and time constraints, such as parts quality, testing and design flaws. Other problems are inherent with spacecraft projects, and will be faced by developers no matter the cost or time spent working on the mission.\\
+Over the past decade, the use of nanosatellites (hereafter referred to as CubeSats) by academic, governmental, commercial and amateur entities has grown drastically \cite{cubesat101,Poghosyan2016,Villela2019}. The relatively low cost and fast turnaround times of these projects make CubeSats ideal platforms for accessing and experimenting in space \cite{cubesat101}. As of June 2020, over 1,300 CubeSats have been launched into space \cite{Kulu2020}. While CubeSats are limited in scope and should not be considered replacements for flagship missions built by agencies such as NASA and ESA, their use is only expected to rise in the coming years \cite{Improving2017,cubesat101}. The low cost and short production times for these missions are appealing to developers, but they also act as constraints for these projects. CubeSats may offer a scaled-down, simplified platform for developers, but they still experience many of the same problems that large satellites do \cite{Improving2017}. Flaws in design, workmanship, software, low reliability of hardware (often consisting of commercial off-the-shelf (COTS) components), lack of adequate testing and communications failures are among a few of the many problems experienced with CubeSat projects \cite{Improving2017}. Many of these issues can be attributed to the cost and time constraints, such as parts quality, testing and design flaws. Other problems are inherent with spacecraft projects, and will be faced by developers no matter the cost or time spent working on the mission.\\
 
 The communications system of a CubeSat is vital to mission success. A CubeSat could be performing invaluable science, but a failure to communicate the results back to the ground renders the mission pointless. Communications system failures are currently one of the most commonly widespread problems experienced by CubeSat developers \cite{Improving2017,Langer2016}. The root causes of these failures are broad, having been attributed to lack of experience, poor design, incorrect link budgeting, electrical failures as well as several other causes \cite{Improving2017,Langer2016}. While communications systems have a higher likelihood to fail compared to other CubeSat subsystems, that does not make them any less crucial to mission success. With the growing popularity of CubeSat projects, it is essential that methodologies be developed to aid in the design and reliability of communications systems.
 
@@ -46,11 +49,11 @@ The communications system of a CubeSat is vital to mission success. A CubeSat co
 \section{Model of Communications System}
 %%%%%%%%%%%%%%%%%%%%%
 
-We created, tested and evaluated a model of a CubeSat communications system for the work described in this case study. This model was created using Matlab and Simulink as well as a software-defined radio (SDR). In the subsections below, we discuss the three major components of this model in-depth.
+We created, tested and evaluated a model of a CubeSat communications system for the work described in this case study. This model was created using MATLAB/Simulink as well as a software-defined radio (SDR). In the subsections below, we discuss the three major components of this model in-depth.
 
 \subsection{Orbital Simulation}
 
-We utilize the MathWorks Aerospace Blockset CubeSat Simulation Library in Matlab/Simulink to develop a simulated CubeSat orbiting the Earth. This library provides a robust set of functionality that can be used to model, simulate and analyze the orbital motion and dynamics of CubeSats and nano satellites \cite{AerospaceBlockset}. The CubeSat Vehicle Model block diagram provided by the library is able to perform this simulation once a specified set of Keplerian orbital parameters (eccentricity, semi-major axis, inclination, right ascension of the ascending node, etc.) are passed to it. An orbital model of a CubeSat vehicle is then generated according to these parameters and placed into a spherical harmonic gravitation model representing Earth's gravity. When the Simulink model is run using an ordinary differential equations (ODE) solver, it outputs the position and velocity of the craft at the next time step, along with quaternion values. This movement is animated using the Simulink 3D Animation block, as shown in Figure \ref{OrbitalAnimation} and then the process is repeated with the new position and velocity values.\\
+We utilize the MathWorks Aerospace Blockset CubeSat Simulation Library in MATLAB/Simulink to develop a simulated CubeSat orbiting the Earth \cite{MATLAB:2019}. This library provides a robust set of functionality that can be used to model, simulate and analyze the orbital motion and dynamics of CubeSats and nanosatellites \cite{AerospaceBlockset}. The CubeSat Vehicle Model block diagram provided by the library is able to perform this simulation once a specified set of Keplerian orbital parameters (eccentricity, semi-major axis, inclination, right ascension of the ascending node, etc.) are passed to it. An orbital model of a CubeSat vehicle is then generated according to these parameters and placed into a spherical harmonic gravitation model representing Earth's gravity. When the Simulink model is run using an ordinary differential equations (ODE) solver, it outputs the position and velocity of the craft at the next time step, along with quaternion values. This movement is animated using the Simulink 3D Animation block, as shown in Figure \ref{OrbitalAnimation} and then the process is repeated with the new position and velocity values.\\
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -63,18 +66,18 @@ We utilize the MathWorks Aerospace Blockset CubeSat Simulation Library in Matlab
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The values we used for our simulation are shown in Table \ref{OrbitalParameters}. The simulation time is chosen to be one week in order to provide a decently long time interval with many orbital passes, while also being reasonable for computation time. All values shown in this table, aside from the Earth's radius, the eccentricity and the location of the ground station, are chosen purely out of experimentation. This portion of the model serves to provide us with orbital information -- as well as a visualization -- of a user-defined CubeSat mission rather than building and launching a physical craft. It is important to note that any Earth-orbiting CubeSat orbit could be used for this project, provided that orbit brings it close to the location of a virtual ground station.
+The values we used for our simulation are shown in Table \ref{OrbitalParameters} \textcolor{blue}{Try to rotate the table and minimize the free space}. The simulation time is chosen to be one week in order to provide a decently long time interval with many orbital passes, while also being reasonable for computation time. All values shown in this table, aside from the Earth's radius, the eccentricity and the location of the ground station, are \textcolor{blue}{chosen purely out of experimentation(CySat's orbit parameters?)}. This portion of the model serves to provide us with orbital information -- as well as a visualization -- of a user-defined CubeSat mission rather than building and launching a physical craft. It is important to note that any Earth-orbiting CubeSat orbit could be used for this project, provided that orbit brings it close to the location of a virtual ground station.
 
-With the position and velocity of the CubeSat calculated during this period, we then simulate its interaction with a virtual ground station. We choose the location of the ground station to be 42.0236$^{\circ}$ and -93.6528$^{\circ}$ as described in Table \ref{OrbitalDatasets} in the Appendix. This location roughly corresponds to the location of a real ground station located at Iowa State University. While we have chosen this particular location, just about any position on Earth could serve as the location for this virtual station. We also note that the simulation assumes sea-level altitude for the ground station's position.\\
+With the position and velocity of the CubeSat calculated during this period, we then simulate its interaction with a virtual ground station. We choose the location of the ground station to be 42.0236$^{\circ}$ \textcolor{blue}{lon, lat?} and -93.6528$^{\circ}$ as described in Table \ref{OrbitalDatasets} in the Appendix. This location roughly corresponds to the location of a real ground station located at Iowa State University. While we have chosen this particular location, just about any position on Earth could serve as the location for this virtual station. We also note that the simulation assumes sea-level altitude for the ground station's position.\\
 
-We next use output from the orbital simulation blocks along with the ground station position to determine if line-of-sight (LOS) between the CubeSat and ground station is achieved at each time step. Using the satellite position vector, and ground station position vector in the Earth-centered, Earth-fixed (ECEF) frame along with the ECEF to CubeSat Body quaternion, we calculate the azimuth and elevation of the CubeSat with respect to the ground station. We can then determine whether or not LOS is achieved between the CubeSat and the ground station by monitoring only the calculated elevation angle. A binary representation of when the CubeSat and ground station are in LOS is shown in the third dataplot of Figure \ref{OrbitalDatasets}. The model also keeps track of how many orbits around the Earth are made by the CubeSat, which is shown in the fourth dataplot of Figure \ref{OrbitalDatasets}. At this point, we now have all of the orbital information necessary to proceed with developing simulated communications between the CubeSat and ground station.
+We next use output from the orbital simulation blocks along with the ground station position to determine if line-of-sight (LOS) between the CubeSat and ground station is achieved at each time step. Using the satellite position vector, and ground station position vector in the Earth-centered, Earth-fixed (ECEF) frame along with the ECEF to CubeSat Body quaternion($q_{B/E}$), we calculate the azimuth and elevation of the CubeSat with respect to the ground station. We can then determine whether or not LOS is achieved between the CubeSat and the ground station by monitoring only the calculated elevation angle. A binary representation of when the CubeSat and ground station are in LOS is shown in the third dataplot \textcolor{blue}{(Is it a correct term?)} of Figure \ref{OrbitalDatasets}. The model also keeps track of how many orbits around the Earth are made by the CubeSat, which is shown in the fourth dataplot of Figure \ref{OrbitalDatasets}. At this point, we now have all of the orbital information necessary to proceed with developing simulated communications between the CubeSat and ground station.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=.9\textwidth]{Fig/SimulinkDataScreenshot.png}
-\caption{A screen capture of the datasets recorded during the orbital simulation. The first dataset represents when the SNR is large enough that connection between the CubeSat and ground station is established. The second data represents how much data is downlinked using a 9600 baud rate. The third dataset represents when there's line-of-sight (LOS) between the CubeSat and the ground station. The fourth dataset counts the number of orbits during the simulation period.}
+\includegraphics[width=1\textwidth]{Fig/OrbitSimulationData.png}
+\caption{A screen capture of the datasets recorded during the orbital simulation. The first dataset represents when the SNR is large enough that connection between the CubeSat and ground station is established. The second data represents how much data is downlinked using a 9600 baud rate. The third dataset represents when there's line-of-sight (LOS) between the CubeSat and the ground station. The fourth dataset counts the number of orbits during the simulation period.redraw and include 7 day plot.}
 \label{OrbitalDatasets}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,9 +85,9 @@ We next use output from the orbital simulation blocks along with the ground stat
 
 \subsection{Communications Simulation}
 
-In the typical design of a real CubeSat communications system, developers perform link budget calculations to determine several properties in their communications system. These calculations aid in understanding the gain and power requirements for the transmitting and receiving antennas of the system and are a primary factor in determining what kind of antenna is used to transmit data. Because we are simulating a communications system, we model the antenna directly with a chosen transmission frequency, and then calculate when a specified signal-to-noise ratio is achieved during periods of LOS.\\
+In the typical design of a real CubeSat communications system, developers perform link budget calculations to determine several properties in their communications system \cite{daylee2018}. These calculations aid in understanding the gain and power requirements for the transmitting and receiving antennas of the system and are a primary factor in determining what kind of antenna is used to transmit data. Because we are simulating a communications system, we model the antenna directly with a chosen transmission frequency, and then calculate when a specified signal-to-noise ratio is achieved during periods of LOS.\\
 
-Using the Mathworks Antenna Toolbox, we model a microstrip patch antenna, popular with developers due to their compact size and efficiency. The transmission frequency is chosen to be 3.4 GHz in the S-band, which is currently a popular band for developers interested in downlinking relatively large amounts of data. A handful of additional parameters for this antenna are described in Table \ref{AntennaParameters}. From these parameters, we generate a table of gain values that is used in the link equation calculation.\\
+(Using the Mathworks Antenna Toolbox, we model a microstrip patch antenna)\textcolor{blue}{Matt provided CySat antenna data, }, popular with developers due to their compact size and efficiency. The transmission frequency is chosen to be 3.4 GHz in the S-band, which is currently a popular band for developers interested in downlinking relatively large amounts of data. A handful of additional parameters for this antenna are described in Table \ref{AntennaParameters}. From these parameters, we generate a table of gain values that is used in the link equation calculation.\\
 
 In addition to determining connection between the CubeSat and ground station, the model calculates the signal-to-noise ratio during these connection periods to determine whether data can be downlinked to the ground station. This is done using the traditional form of the link equation, which relates all necessary parameters in a communication system including but not limited to, data rate, antenna size, propagation path length, and transmitter power \citep{Wertz1999}. The link equation is shown in Equation \ref{LinkEquation}.
 
@@ -99,7 +102,7 @@ where E$_{b}$/N$_{o}$ is the ratio of received energy per bit to noise-density, 
 
 The radio communications portion of the model uses a Universal Software Radio Peripheral (USRP) B210 software-defined radio (SDR) from Ettus Research to perform quaternary phase-shift keying transmission and reception of sample telemetry data, as if a CubeSat were transmitting to the ground station. This portion of the model is built using the MathWorks Communications Toolbox \cite{CommunicationsToolbox}. Telemetry is broadcasted from the transmitting antenna to the receiving antenna when the communication status, shown in the first dataplot of Figure \ref{OrbitalDatasets}, is active. The transmission takes place specifically at each time step where the communication status goes from inactive to active.\\
 
-The sample telemetry is contained within a JSON file, and consists of a struct with a handful of sample system measurements. Each parameter is a typical telemetry variable that would be collected in a real CubeSat mission. This is a simplified version of a typical CubeSat telemetry collection, which may consist of hundreds of parameters. This is possible with our configuration but for our study here, we maintain a simplified version. The sample telemetry is shown in Figure \ref{Telemetry}.\\
+The sample telemetry is contained within a JSON file, and consists of a struct with a handful of sample system measurements. Each parameter is a typical telemetry variable that would be collected in a real CubeSat mission. This is a simplified version of a typical CubeSat telemetry collection, which may consist of hundreds of parameters. This is possible with our configuration but for our study here, we maintain a simplified version. The sample telemetry is shown in Appendix F.\\
 
 When the communications simulation indicates transmission is active, this telemetry message is read into the model and encoded into bits, preceded by a unipolar Barker code. The message then goes through QPSK modulation with a $\pi$/4 phase offset. The signal then goes through a raised cosine transmit filter, which upsamples and filters the input signal to prepare it for transmission. This signal is then sent to the USRP B210 SDR and transmitted at 3.4 GHz like in the model. The receiver, which is constantly listening for a signal throughout the simulation period, acquires it and sends processes it through an automatic gain controller (AGC), a raised cosine receive filter, a coarse frequency compensator, symbol and carrier synchronizers, a preamble detector, a frame synchronizer, and finally a data decoder. This process outputs the telemetry message, which is then organized into a comma-separated variable (CSV) file for later use. Each transmission that is received is appended to this file, so that we have a collection of telemetry messages received throughout the simulation.\\
 
@@ -109,11 +112,54 @@ For a given CubeSat mission, the telemetry received is the crucial bit of inform
 \section{Application of Formal Methods}
 %%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Specification}
+Formal methods are a set of mathematically rigorous techniques used in the development of software and hardware systems. These techniques have been used in many fields, particularly in the aviation industry and with air traffic control systems to verify performance \cite{GCMTR16,DRR17}. While formal methods have been used in large spacecraft projects, not much literature exists on their inclusion. And CubeSats are a relatively new platform, having only become widely used over the past decade. In the past year, a few research groups have performed case studies applying these techniques to CubeSat projects \cite{Boufaied2020,Gross2020}. These studies improved upon CubeSat performance in strikingly different ways. Boufaied et al. (2020) performed trace-checking to look for specific patterns in data. Gross et al. (2020) developed a decision module that could be used to assess the commands from an unverified controller. These two projects demonstrate the broad applications of formal methods to such projects. For these reasons, applying formal methods to aid in CubeSat design presents an elaborate and as yet hardly touched field of work.
+
+\subsection{Formal Specification}
+
+A specification describes the desired performance of some aspect of a system. Here, we examine the performance of the simulated communications system particularly with aspects involving transmit/receive operations, measurement of parameters during radio operation, and CubeSat communications monitoring. Since specification is the biggest bottleneck in the design of robust embedded systems \cite{Roz17}, and since formal specification can be a very enlightening activity for the system design process, we treat this as an activity unto itself.\\
+
+There are two sources of data we wish examine. The first is the set of parameters plotted in Figure \ref{OrbitalDatasets}, which tells us when the CubeSat and ground station are in LOS, when they're communicating, how many times they communicate, etc. The second source of data is the CSV file containing the decoded telemetry, which tells us how the CubeSat's systems are performing, the number of the transmission, voltages and currents, etc. For a typical CubeSat mission, specifications would generally be decided upon before the CubeSat is built and launched, based off the needs of the mission. For our case study, the model was developed alongside a set of specifications. However, the telemetry specifications were written post-implementation so that experimentation with different values and parameters could be performed.\\
+
+\begin{comment}
+The specifications defining system operations are encoded into mission-time linear temporal logic (MLTL).
+
+For our specifications, we reference previous ground station designs, the NASA standard for satellite systems developed by the Goddard Space Flight Center (GSFC), and in some cases simply apply common sense \cite{choi2017,Asundi2013,Goddard}. The specifications are written using Mission-time Linear Temporal Logic (MLTL) \cite{RRS14,LVR19}. MLTL has been used in many industrial case studies \cite{RRS14,GRS14,SRRMMI15,RSI15,SMR15,SMR16,MRS17}, and was the official logic of the 2018 Runtime Verification Benchmark Competition \cite{RVBC2018}. Many specifications from other case studies, in logics such as MTL \cite{AH90} and STL \cite{MN04}, can be represented in MLTL. We intuitively relate MLTL to LTL and MTL as follows: (1) MLTL formulas are LTL formulas with bounded intervals over temporal operators, and interpreted over finite traces. (2) MLTL formulas are MTL formulas without any unbounded intervals, and interpreted over finite traces.
+
+First, we examine the operation of the communications system. A specification is often sourced from previous documentation or reasoning about a similar system, but that is not always the case.
+\end{comment}
 
 \subsection{Runtime Verification}
 
 \section{Results}
+
+The simulated communications system that we have developed runs in $\sim$ 15 min and generates two separate datasets. The first is a set of parameters calculated from the orbital simulation. This data indicates when communication was viable, the position of the craft at each time step, the number of orbits made during the simulation period, etc. Verifying that these datasets adhere to the specifications encoded in MLTL tell us how our ground station is operating and that communications are happening at that proper times. The second dataset is comprised of the telemetry variables transmitted and received using the USRP B210 SDR. This data provides information about the radio system operating on-board the CubeSat and lets us understand the state of the craft. In the following subsections, we compare this data offline, apart from the simulation, against the designed MLTL specifications using the R2U2 tool. In particular, we examine the time necessary to locate faults within these datasets, the amount of memory required by the tool while processing, and other additional statistics detailing the resources required to verify system performance.\\
+
+\subsection{Orbital Dataset Verification}
+
+The orbital dataset is collected throughout the simulation, which covers a weeklong period. The datafile consists of the \textbf{Time} (s), the system's \textbf{Connection} status in boolean representation, the CubeSat's estimated \textbf{Received} data with a 9600 baud rate measured in bits, the system's \textbf{LOS} status in boolean representation,	the CubeSat's \textbf{OrbitNumber} measured as an integer, and the \textbf{Azimuth} and \textbf{Elevation} of the CubeSat measured in degrees. In total, there are 193,025 measurements of these parameters during the simulation.\\
+
+Using specifications 5,6,7,8,9,10,11 and 12 encoded into MLTL, R2U2 verifies offline that the system is operating nominally for the entire duration within $\sim$ 43 s. This may be considered a non-trivial duration, since that time may be considered too long when deciding whether or not to command the spacecraft during the orbit the most recent telemetry was received. It's of note however that a developer likely wouldn't actively compare the most recent telemetry to the telemetry received during the entire lifetime of the craft, since the computation time for verification would progressively increase to longer and more undesirable durations. However, it would be of benefit to verify a set of the most recently collected telemetry values to monitor for system changes. In this way, we verify the CubeSat's recent performance while saving on computation time. In Figure \ref{OrbitalDataTimes}, we measure the length of time needed to verify progressively longer datasets to measure the efficiency of R2U2's computation power. As Figure \ref{OrbitalDataTimes} shows, this relationship scales linearly (plotted logarithmically for clarity) so the algorithm needed to process this dataset has runtime O(m).\\
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.7\textwidth]{Fig/OrbitalDataTimes.png}
+\caption{Measure of how long it takes for the RV engine to verify progressively larger entries of data. This relationship is linear in time, but the x-axis is logarithmically scaled for better visualization.}
+\label{OrbitalDataTimes}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Telemetry Dataset Verification}
+
+The telemetry dataset is collected each time the Connection parameter in the orbital simulation goes active. Using the parameters given in Tables \ref{OrbitalParameters},\ref{AntennaParameters} and \ref{DownlinkParameters} with the simulation results in 24 instances of a virtual connection between the CubeSat and the ground station. The telemetry data consists of a set of dummy variables relating to a CubeSat's radio system that would be measured during a real CubeSat mission.
+
+%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion and Future Work}
@@ -129,6 +175,7 @@ For a given CubeSat mission, the telemetry received is the crucial bit of inform
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %%%%%%%%%%%%%%%%%%%%%
 \newpage

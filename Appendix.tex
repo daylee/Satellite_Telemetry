@@ -89,126 +89,205 @@ Eb\_N0\_required (dB)   & 10                        \\ \hline
 {"_index":"Cube_beacon_01","_type":"_doc","_source":{"3.3V Bus Current":0.203,"3.3V Bus Voltage":3.299,"3.3V Input Current":0.105,"5V Bus Current":0.046,"5V Bus Voltage":5.00388,"5V Input Current":0.05,"@timestamp":"2020-01-16T20:46:20Z","ADC curr (?)":0.013250000000000001,"ADCS 3v3 current":-0.21858590000000003,"ADCS 3v3 voltage":3.288,"ADCS 5V current":-0.13066846000000001, "ADCS 5V voltage":4.9730099999999995,"ADCS Temp 0":22.942298435035127,"ADCS Temp 1":22.00006472534369,"ADCS VBatt current":-0.12939579999999998,"ADCS VBatt voltage":8.2126,"Battery Bus Current":0.067,"Battery Bus Voltage":8.2566,"Battery Current":0.16800000000000015,"Battery Temperature":14.91022252000002,"Battery Voltage":8.2698,"Channel 1 board temperature":20.37117822674668,"Channel 1 module temperature":20.28539843309295,"Channel 1 output current":0.004,"Channel 1 output voltage":0.0484,"Channel 1 panel current A":0.0008,"Channel 1 panel current B":0.0008,"Channel 1 panel voltage A":0.023960000000000002,"Channel 1 panel voltage B":0.023960000000000002,"Channel 2 board temperature":20.88575416931667,"Channel 2 module temperature":21.057240334344215,"Channel 2 output current":0.09,"Channel 2 output voltage":8.525,"Channel 2 panel current A":0.0158,"Channel 2 panel current B":0.0414,"Channel 2 panel voltage A":15.693800000000001,"Channel 2 panel voltage B":15.65786,"Channel 3 board temperature":21.742989427224302,"Channel 3 module temperature":22.085746726947946,"Channel 3 output current":0.161,"Channel 3 output voltage":8.551400000000001,"Channel 3 panel current A":0.1308,"Channel 3 panel current B":0.15200000000000002,"Channel 3 panel voltage A":12.189650000000002,"Channel 3 panel voltage B":1.60532,"Channel 4 board temperature":20.800003748429162,"Channel 4 module temperature":21.571581475708626,"Channel 4 output current":0.029,"Channel 4 output voltage":8.5008,"Channel 4 panel current A":0.022000000000000002,"Channel 4 panel current B":0.15500000000000003,"Channel 4 panel voltage A":15.6339,"Channel 4 panel voltage B":1.58735,"Channel 5 Module input voltage":5.106,"Channel 5 board temperature":24.140652432542993,"Channel 5 module temperature":24.48286419790361,"Channel 5 output current":0.007,"Channel 5 panel current A":0.0018,"Channel 5 panel current B":0.001,"Channel 6 Module input voltage":3.7,"Channel 6 board temperature":25.594515948494973,"Channel 6 module temperature":26.70534858484052,"Channel 6 output current":0.129,"Channel 6 panel current A":0.2884,"Channel 6 panel current B":0.013400000000000002,"Datamnt Usage":0.434,"EIMU current":0.00555,"EPS 3.3 Voltage":3.296,"EPS 3.3V Current":0.009800000000000001,"EPS 5V Current":0.0077,"EPS 5V Voltage":4.98477,"FCPU 3V3 Current":0.16869099999999998,"FCPU 3V3 Voltage":3.302,"FCPU Processor Temp":23.541594667502068,"FCPU Var 1":0,"FCPU Var 2":0,"FCPU Var 3":0,"FCPU Var 4":0,"FCPU Var 5":0,"FCPU Var 6":0,"Ioe States":237,"LI 3V3 Current":0.40367200000000003,"LI 3V3 Voltage":3.302,"LI VBATT Current":-0.19264799999999999,"LI VBATT Voltage":8.243400000000001,"Lithium #RX":0,"Lithium #TX":261648,"Lithium MSP430 Temp":0,"Lithium Op Count":11731,"Lithium PA Temp":22.85666520419977,"Lithium RSSI":97,"NumResets":548, "5VSbVolt":5.1200,"5VSbCurr":.0008,"3.3VSbVolt":3.3160,"3.3VSbCurr":.0005,"1.5VSbVolt"1.4930,"1.5VSbCurr":.0004,"Operation Mode":0,"Output Regulator Temperature":24.662146180000008,"PIM 3v3 current":-0.129,"PIM 3v3 voltage":0,"PIM VBatt monitor":0,"RTC Unix Time":1579207577,"SD Usage":0,"SD V (?)":0,"STAMP GPIO States":29809,"TBEx Payload Current":-0.227,"TBEx Payload Voltage":0,"avgNumActiveTasks1":1.64,"avgNumActiveTasks15":1.81,"avgNumActiveTasks5":1.82,"data_checksum_passed":true,"flag":3,"freeMemPlusCache":107632,"header_checksum_passed":true,"pid":0,"sid":83,"telemetry_archive":false,"telemetry_archive_file_num":0,"totNumProcesses":41,"usedMemMinusCache":19272}}
 \end{lstlisting}
 
+\end{comment}
+
+\subsection{Ground Station Variables}
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{ll} 
+\hline\hline
+\textbf{Signal} & \textbf{Description}                               \\ 
+\hline
+\texttt{Time}            & Number of seconds into simulation.                 \\
+\texttt{LOS}             & Line of sight indication.                          \\
+\texttt{Conn}            & Connection status indication.                      \\
+\texttt{Received}        & Theoretical data downlinked with 9600 baud.        \\
+\texttt{OrbitNum}        & Number of orbits since simulation start.           \\
+\texttt{Az}              & Azimuth angle of spacecraft wrt ground station.    \\
+\texttt{El}              & Elevation angle of spacecraft wrt ground station.  \\
+\hline\hline
+\end{tabular}
+\end{table}
+
+\subsection{CubeSat Telemetry Variables}
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{ll} 
+\hline\hline
+\textbf{Signal} & \textbf{Description}                     \\ 
+\hline
+\texttt{Beacon}          & Identifier                               \\
+\texttt{Type}            & Identifier                               \\
+\texttt{ID}              & Identifier                               \\
+\texttt{Score}           & Identifier                               \\
+\texttt{Radio\_3V3\_C}   & 3V3 line current to radio.               \\
+\texttt{Radio\_3V3\_V}   & 3V3 line voltage to radio.               \\
+\texttt{Radio\_VBATT\_C} & Current to radio battery.                \\
+\texttt{Radio\_VBATT\_V} & Voltage to radio battery.                \\
+\texttt{Radio\_RX}       & Number of radio receptions.              \\
+\texttt{Radio\_TX}       & Number of radio transmissions.           \\
+\texttt{Radio\_Temp}     & Temperature of radio.                    \\
+\texttt{Radio\_PA\_Temp} & Temperature of radio power amplifier.    \\
+\texttt{Op\_Count}       & Number of operations perfomed by radio.  \\
+\texttt{RSSI}            & Received signal strength indicator.      \\
+\hline\hline
+\end{tabular}
+\end{table}
+
+\subsection{Sample Telemetry}
+
+\begin{lstlisting}
+{{"_index":"beacon_0_82","_type":"_doc","_id":"fc5d6f47-81f0-5a83-abe9-7b2f21e24c5a","_score":1,"_source":{"LI 3V3 Current":0.22943999999999998,"LI 3V3 Voltage":3.316,"LI VBATT Current":-0.19289599999999998,"LI VBATT Voltage":8.2698,"Lithium #RX":0,"Lithium #TX":173484,"Lithium MSP430 Temp":0,"Lithium Op Count":7911,"Lithium PA Temp":16.764199712583377,"Lithium RSSI":106}}}
+\end{lstlisting}
+
 \subsection{Sample Specifications for the Modeled CubeSat Communications System}
 
+This appendix consists of 12 separate specifications that were developed for this case study. Each specification, written in MLTL, mathematically describes the expected behavior of system variables while removing potential risk of misinterpretation.
+
 \subsubsection{\textbf{Necessity of Line-of-Sight Communication}}
-“Communication between the spacecraft and ground station can only occur when the spacecraft is above the horizon, ie. the elevation angle of the spacecraft provided by GPredict, El$_{GPR}$, and the elevation angle of the antenna, El$_{ROT}$, must be above 0. (Line of sight conditions are met.)"\\
+“Communication between the spacecraft and ground station can only occur when the spacecraft is above the horizon, ie. the elevation angle of the spacecraft must be above 0. (Line of sight conditions are met.)"\\
 \[ Atomic\:Propositions \begin{cases}
-  \varphi_1 & (El_{ROT} > 0) \\
-  \varphi_2 & (El_{GPR} > 0) \\
+  \varphi_1 & (El_{SAT} > 0) \\
+  \varphi_2 & COMM == 1) \\
 \end{cases} \]
 \begin{equation}
     \label{Spec 1}
-    G_{[0,M]} \{(\varphi_1 \wedge \varphi_1)\}
+    G_{[0,M]} \{(\varphi_2 \rightarrow \varphi_1)\}
 \end{equation} \\
 This specification stems from common sense, as there must be line of sight between the CubeSat and the ground station.
 
 \subsubsection{\textbf{Azimuth Angle Bounds}}
-“The azimuth angle of the ground station, Az$_{ROT}$, and the CubeSat (provided by a source like GPredict) Az$_{GPR}$ will be bounded by 0 and 360 at all instances."\\
+“The azimuth angle of the CubeSat, Az$_{SAT}$, will be bounded by 0 and 360 at all instances. The current value of Az$_{SAT}$ will not vary more than 1$^{\circ}$ from the previous time step."\\
 \[ Atomic\:Propositions \begin{cases}
-  \varphi_1 & (Az_{ROT} $\geq$ 0) \\
-  \varphi_2 & (Az_{GPR} $\geq$ 0) \\
-  \psi_1 & (Az_{ROT} $\leq$ 360) \\
-  \psi_2 & (Az_{GPR} $\leq$ 360) \\
+  $\varphi_1$ & ($Az_{SAT}$ $\geq$ -180) \\
+  $\varphi_2$ & ($Az_{SAT}$ $\leq$ 180) \\
+  \psi & (abs(Az_{SAT} - Az_{SAT}_{i-1}) < 1.0) \\
 \end{cases} \]
 \begin{equation}
     \label{Spec 1}
-    G_{[0,M]} \{(\varphi_1 \wedge \psi_1) \wedge (\varphi_2 \wedge \psi_2)\}
+    G_{[0,M]} \{(\varphi_1 \wedge \varphi_2 \wedge \psi)\}
 \end{equation} \\
 
 \subsubsection{\textbf{Elevation Angle Bounds}}
-“The elevation angle of the ground station, El$_{ROT}$, and the CubeSat (provided by a source like GPredict) El$_{GPR}$ will be bounded by -90 and 90 at all instances."\\
+“The elevation angle of the CubeSat, El$_{SAT}$, will be bounded by -90 and 90 at all instances."\\
 \[ Atomic\:Propositions \begin{cases}
-  \varphi_1 & (El_{ROT} $\geq$ -90) \\
-  \varphi_2 & (El_{GPR} $\geq$ -90) \\
-  \psi_1 & (El_{ROT} $\leq$ 90) \\
-  \psi_2 & (El_{GPR} $\leq$ 90) \\
+  \varphi_1 & (El_{SAT} $\geq$ -90) \\
+  \varphi_2 & (El_{SAT} $\leq$ 90) \\
+  \psi & (abs(El_{SAT} - El_{SAT}_{i-1}) < 1.0) \\
 \end{cases} \]
 \begin{equation}
     \label{Spec 1}
-    G_{[0,M]} \{(\varphi_1 \wedge \psi_1) \wedge (\varphi_2 \wedge \psi_2)\}
+    G_{[0,M]} \{(\varphi_1 \wedge \varphi_2 \wedge \psi)\}
 \end{equation} \\
 
-\subsubsection{\textbf{GPredict Orbit Number}}
-“The orbit number of the spacecraft, OrbNum, provided by GPredict will never be less than 0."\\
+\subsubsection{\textbf{Orbit Number Check}}
+“The orbit number of the spacecraft provided by the model will never be less than 0. The orbit number of the current time step will be equal to or greater than the orbit number from the previous time step."\\
 \[ Atomic\:Propositions \begin{cases}
   \varphi_1 & (OrbNum $\geq$ 0) \\
-\end{cases} \]
-\begin{equation}
-    \label{Spec 1}
-    G_{[0,M]} \{(\varphi_1)\}
-\end{equation} \\
-This information is crucial to knowing how many passes the CubeSat has made, and also acts as a check to ensure the information pulled from GPredict is sensical.
-
-\subsubsection{\textbf{Sband 5V Voltage Variation}}
-“The Sband 5V line, 5VSbVolt, must not vary more than 10\% from the desired 5V value."\\
-\[ Atomic\:Propositions \begin{cases}
-  \varphi_1 & (5VSbVolt $\geq$ 4.5V) \\
-  \varphi_2 & (5VSbVolt $\leq$ 5.5V) \\
+  \psi_1 & (OrbNum $\geq$ OrbNum_{i-1})\\
 \end{cases} \]
 \begin{equation}
     \label{Spec 1}
     G_{[0,M]} \{(\varphi_1 \wedge \psi_1)\}
 \end{equation} \\
+This information is crucial to knowing how many passes the CubeSat has made, and also acts as a check to ensure the information pulled from the model is sensible.
 
-\subsubsection{\textbf{Sband 5V Current Variation}}
-“The Sband 5V line must not have a current, 5VSbCurr, varying more than 5\% from
-the desired current value, 5VSbExp."\\
+\subsubsection{\textbf{Radio Temperature Variation}}
+“The temperature of the radio, Radio\_PA\_Temp, will not vary more 1$^{\circ}$ from the previous time step."\\
 \[ Atomic\:Propositions \begin{cases}
-  \varphi_1 & (5VSbExp $\geq$ .95*5VSbExp) \\
-  \varphi_2 & (5VSbExp $\leq$ 1.05*5VSbExp) \\
+  \varphi & (abs(Radio\_Temp - Radio\_Temp_{i-1} $\leq$ 1.0)) \\
 \end{cases} \]
 \begin{equation}
     \label{Spec 1}
-    G_{[0,M]} \{(\varphi_1 \wedge \psi_1)\}
+    G_{[0,M]} \{(\varphi)\}
 \end{equation} \\
 
-\subsubsection{\textbf{Sband 3.3V Voltage Variation}}
-“The Sband 3.3V line, 3.3VSbVolt, must not vary more than 10\% from the desired 3.3V value."\\
+\subsubsection{\textbf{Radio Power Amplifier Temperature Variation}}
+“The temperature of the radio's power amplifier, Radio\_PA\_Temp, will not vary more 1$^{\circ}$ from the previous time step."\\
 \[ Atomic\:Propositions \begin{cases}
-  \varphi_1 & (3.3VSbVolt $\geq$ 2.97V) \\
-  \varphi_2 & (3.3VSbVolt $\leq$ 3.63V) \\
+  \varphi & (abs(Radio\_PA\_Temp - Radio\_PA\_Temp_{i-1} $\leq$ 1.0)) \\
 \end{cases} \]
 \begin{equation}
     \label{Spec 1}
-    G_{[0,M]} \{(\varphi_1 \wedge \psi_1)\}
+    G_{[0,M]} \{(\varphi)\}
 \end{equation} \\
 
-\subsubsection{\textbf{Sband 3.3V Current Variation}}
-“The Sband 3.3V line must not have a current, 3.3VSbCurr, varying more than 5\% from
-the desired current value, 3.3VSbExp."\\
+\subsubsection{\textbf{Radio 3.3V Voltage Variation}}
+“The Radio 3.3V line, 3.3VRadioVolt, must not vary more than 10\% from the desired 3.3V value. It must also not vary more than .5V from the previous time step."\\
 \[ Atomic\:Propositions \begin{cases}
-  \varphi_1 & (3.3VSbExp $\geq$ .95*3.3VSbExp) \\
-  \varphi_2 & (3.3VSbExp $\leq$ 1.05*3.3VSbExp) \\
+  \varphi_1 & (3.3VRadioVolt $\geq$ 2.97V) \\
+  \varphi_2 & (3.3VRadioVolt $\leq$ 3.63V) \\
+  \psi & (abs(3.3VRadioVolt - 3.3VRadioVolt_{i-1}) < .5)\\
 \end{cases} \]
 \begin{equation}
     \label{Spec 1}
-    G_{[0,M]} \{(\varphi_1 \wedge \psi_1)\}
+    G_{[0,M]} \{(\varphi_1 \wedge \varphi_2 \wedge \psi)\}
 \end{equation} \\
 
-\subsubsection{\textbf{Sband 1.5V Voltage Variation}}
-“The Sband 1.5V line, 1.5VSbVolt, must not vary more than 10\% from the desired 1.5V value."\\
+\subsubsection{\textbf{Radio 3.3V Current Variation}}
+“The Radio 3.3V line must not have a current, 3.3VRadioCurr, varying more than 5\% from
+the desired current value, 3.3VRadioExpCurr. It must also not vary more than .05A from the value of the previous time step."\\
 \[ Atomic\:Propositions \begin{cases}
-  \varphi_1 & (1.5VSbVolt $\geq$ 1.35V) \\
-  \varphi_2 & (1.5VSbVolt $\leq$ 1.65V) \\
+  \varphi_1 & (3.3VRadioCurr $\geq$ .95*3.3VRadioExpCurr) \\
+  \varphi_2 & (3.3VRadioCurr $\leq$ 1.05*3.3VRadioExpCurr) \\
+  \psi & (abs(3.3VRadioCurr - 3.3VRadioCurr_{i-1}) $\leq$ .05)\\
 \end{cases} \]
 \begin{equation}
     \label{Spec 1}
-    G_{[0,M]} \{(\varphi_1 \wedge \psi_1)\}
+    G_{[0,M]} \{(\varphi_1 \wedge \varphi_2 \wedge \psi)\}
 \end{equation} \\
 
-\subsubsection{\textbf{Sband 1.5V Current Variation}}
-“The Sband 1.5V line must not have a current, 1.5VSbCurr, varying more than 5\% from
-the desired current value, 1.5VSbExp."\\
+\subsubsection{\textbf{Radio VBatt Voltage Variation}}
+“The Radio VBatt voltage, RadioVBattVolt, must not vary more than 10\% from the desired 8.3V value. It must also not vary more than .5V from the previous time step."\\
 \[ Atomic\:Propositions \begin{cases}
-  \varphi_1 & (1.5VSbExp $\geq$ .95*1.5VSbExp) \\
-  \varphi_2 & (1.5VSbExp $\leq$ 1.05*1.5VSbExp) \\
+  \varphi_1 & (RadioVBattVolt $\geq$ 7.47V) \\
+  \varphi_2 & (RadioVBattVolt $\leq$ 9.13V) \\
+  \psi & (abs(RadioVBattVolt - RadioVBattVolt_{i-1}) < .5)\\
 \end{cases} \]
 \begin{equation}
     \label{Spec 1}
-    G_{[0,M]} \{(\varphi_1 \wedge \psi_1)\}
+    G_{[0,M]} \{(\varphi_1 \wedge \varphi_2 \wedge \psi)\}
 \end{equation} \\
 
+\subsubsection{\textbf{Radio VBatt Current Variation}}
+“The Radio VBatt voltage line must not have a current, RadioVBattCurr, varying more than 5\% from the desired current value, RadioVBattCurrExp. It must also not vary more than .05A from the value of the previous time step."\\
+\[ Atomic\:Propositions \begin{cases}
+  \varphi_1 & (RadioVBattCurr $\geq$ .95*RadioVBattCurrExp) \\
+  \varphi_2 & (RadioVBattCurr $\leq$ 1.05*RadioVBattCurrExp) \\
+  \psi & (abs(RadioVBattCurr - RadioVBattCurr_{i-1}) $\leq$ .05)\\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 1}
+    G_{[0,M]} \{(\varphi_1 \wedge \varphi_2 \wedge \psi)\}
+\end{equation} \\
+
+\subsubsection{\textbf{Transmit Count Check}}
+“The number of times the CubeSat transmits to the ground station, Radio\_TX, will be greater than the previous time the transmission was received."\\
+\[ Atomic\:Propositions \begin{cases}
+  \varphi & (Radio\_TX > Radio\_TX_{i-1})\\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 1}
+    G_{[0,M]} \{(\varphi)\}
+\end{equation} \\
+
+The number won't necessarily be greater by exactly 1, since the ground station could conceivably not receive a transmission.
+
+\subsubsection{\textbf{Operation Count Check}}
+“The number of times the CubeSat performs operations, Radio\_Op\_Count, will be greater than the previous time the transmission was received."\\
+\[ Atomic\:Propositions \begin{cases}
+  \varphi & (Radio\_Op\_Count > Radio\_Op\_Count_{i-1})\\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 1}
+    G_{[0,M]} \{(\varphi)\}
+\end{equation} \\
+
+The number won't necessarily be greater by exactly 1, since the ground station could conceivably not receive a transmission.
+
+\begin{comment}
 \subsubsection{\textbf{Spacecraft Attitude Bounds}}
 “The orientation angles X,Y,Z measured by the spacecraft sensors shall be bounded between 0 and 360 degrees in all instances."\\
 \[ Atomic\:Propositions \begin{cases}
