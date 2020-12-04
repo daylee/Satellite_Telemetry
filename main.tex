@@ -88,7 +88,7 @@ The system variables referring to all of the datasets in Figure \ref{OrbitalData
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=1\textwidth]{Fig/OrbitSimulationData.png}
+\includegraphics[width=1\textwidth]{Fig/OrbitSimData.Updated.png}
 \caption{Datasets recorded during the orbital simulation. (a) The orbit number of the CubeSat throughout the simulation. (b) Binary representation of when line-of-sight (LOS) is achieved between the CubeSat and the ground station. (c) Binary representation of when the signal-to-noise ratio (SNR) is great enough during LOS that communication between the CubeSat and ground station is possible. (d) Estimated number of bits received by the ground station with a 9600 baud rate. (e) Azimuth angle of the CubeSat with respect to the ground station. (f) Elevation angle of the CubeSat with respect to the ground station.}
 \label{OrbitalDatasets}
 \end{figure}
@@ -219,11 +219,22 @@ The sample telemetry also lists the number of times that the CubeSat's on-board 
 
 \section{Results}
 
-The simulated communications system that we developed runs in $\sim$15 min and generates two orbital dataset and telemetry dataset. In the following subsections, we compare this data offline, apart from the simulation, against the designed MLTL specifications using the R2U2 tool. In particular, we examine the time necessary to locate faults within these datasets, the amount of memory required by the tool while processing, and other additional statistics detailing the resources required to verify system performance. The R2U2 tool is not integrated into the model since we are running it offline. Post-simulation, the data is run through a pre-processing layer that maps multiple inputs into a single Boolean atomic input for R2U2 \cite{Cauwels2020}. This methodology provides lower precision than embedding the tool but greatly simplifies the verdicts outputted by it.
+The simulated communications system we have developed for this case study monitors and outputs orbital data and simulated CubeSat telemetry during a weeklong simulation period. In this section, we compare this data offline, apart from the simulation, against the designed MLTL specifications using the R2U2 tool. In particular, we examine the time necessary to locate faults within these datasets, the amount of memory required by the tool while processing, and other additional statistics detailing the resources required to verify system performance. The R2U2 tool is not integrated into the model since we are running it offline. Post-simulation, the data is run through a pre-processing layer that maps multiple inputs into a single Boolean atomic input for R2U2 \cite{Cauwels2020}. This methodology provides lower precision than embedding the tool but greatly simplifies the verdicts outputted by it \cite{Cauwels2020}.
 
 \subsection{Orbital Dataset Verification}
 
 The orbital dataset is collected throughout the simulation. The datafile consists of the \textbf{Time} (s), the system's \textbf{Connection} status in boolean representation, the CubeSat's estimated \textbf{Received} data with a 9600 baud rate measured in bits, the system's \textbf{LOS} status in boolean representation,	the CubeSat's \textbf{OrbitNumber} measured as an integer, and the \textbf{Azimuth} and \textbf{Elevation} of the CubeSat measured in degrees. In total, there are 193,025 measurements of these parameters during the simulation.\\
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.8\textwidth]{Fig/LOSEL_Spec1.png}
+\caption{Results of running Specification 1, titled "Necessity of Line-of-Sight Communication", in R2U2 with multiple datasets. (a) Nominal performance with no change. (b) Injected faults, one during the time of an orbital pass. Temporal operators account for multiple off-nominal measurements before a fault is declared.}
+\label{ConnElSpecResults}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 After the simulation is run, we put the data through the pre-processing layer to output a single Boolean atomic input. Using this methodology, we individually validate each of the specifications we have developed. Since we formally discussed multiple specifications in the previous section, we specifically highlight them here as well. Figure \ref{ConnElSpecResults} shows the elevation angle and Conn status of the CubeSat throughout the simulation and the RV output when that data is run through R2U2 withe Specification 1. Figure \ref{ConnElSpecResults}.a represents a nominal simulation wherein no faults occur. Figure \ref{ConnElSpecResults}.b represents a simulation where multiple bad collections occur at different times. Specification 1 states that an indication of Conn = 1 implies the elevation angle is greater than 0. While four off-nominal data collections occur during this simulation, as is shown with the RV output, only one actually takes place during a time when Conn = 1.\\
 
@@ -233,7 +244,7 @@ After the simulation is run, we put the data through the pre-processing layer to
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=1\textwidth]{Fig/ConnElSpecResults.png}
+\includegraphics[width=.8\textwidth]{Fig/Az_Spec2.png}
 \caption{Results of running Specification 1, titled "Necessity of Line-of-Sight Communication", in R2U2 with multiple datasets. (a) Nominal performance with no change. (b) Injected faults, one during the time of an orbital pass. Temporal operators account for multiple off-nominal measurements before a fault is declared.}
 \label{ConnElSpecResults}
 \end{figure}
@@ -242,28 +253,45 @@ After the simulation is run, we put the data through the pre-processing layer to
 
 \subsection{Telemetry Dataset Verification}
 
-The telemetry dataset is collected each time the Connection parameter in the orbital simulation goes active. Using the parameters given in Tables \ref{OrbitalParameters},\ref{AntennaParameters} and \ref{DownlinkParameters} with the simulation results in 24 instances of a virtual connection between the CubeSat and the ground station. The telemetry data consists of a sample set of variables relating to a CubeSat's radio system that would be measured during a real CubeSat mission.\\
+The telemetry dataset is collected each time the Connection parameter in the orbital simulation goes active. Using the parameters given in Tables \ref{OrbitalParameters},\ref{AntennaParameters} and \ref{DownlinkParameters} with the simulation results in 46 instances of a virtual connection between the CubeSat and the ground station. The telemetry data consists of a sample set of variables relating to a CubeSat's radio system that would be measured during a real CubeSat mission.\\
 
 After the simulation is run, we put the data through the pre-processing layer to output a single Boolean atomic input. Using this methodology, we individually validate each of the specifications we have developed. As with the orbital dataset validation, we highlight the specifications discussed in the previous section. Figure \ref{3V3SpecResults} shows the 3.3V voltage measurement throughout the simulation period. Figure \ref{3V3SpecResults}.a represents a nominal simulation wherein no faults occur. Figure \ref{3V3SpecResults}.b represents a simulation where a few bad data points are collected, but due to the temporal operators of Specification 7, they do not cause a fault. Figure \ref{3V3SpecResults}.c represents a simulation in which a failure takes place and the 3.3V line slowly lowers to 0V. As indicated by the RV output in Figure \ref{3V3SpecResults}.c, a few off-nominal data points are allowed by the temporal operators before declaring a fault has occurred.\\
-
-The 3.3V specification is worth discussing more extensively. Because a CubeSat is a system of systems, for a given CubeSat mission, there could be up to several dozen voltages the developers would want to monitor during the mission phase. Formally specifying these voltages doesn't vary from the 3.3V voltage monitor described in Specification 7 however, aside from the bounds assigned to the atomic propositions. Once a single voltage monitoring specification is written, all others match it almost perfectly. This can be seen with Specification 9 in Appendix D, which monitors the 8.3V supplied to the radio's battery. Aside from adjusting the lower and upper bounds, this specification is identical the the 3.3V voltage monitor.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=1\textwidth]{Fig/3V3SpecResults.png}
+\includegraphics[width=.8\textwidth]{Fig/3.3V_Spec7.png}
 \caption{Results of running Specification 7, titled "Radio 3.3V Voltage Variation", in R2U2 with multiple datasets. (a) Nominal performance with no change. (b) Multiple injected faults, considered false positives, are accounted for with temporal operators and do not indicate a fault. (c) Simulated failure of voltage supply, fault declared after multiple poor measurements indicates issue.}
 \label{3V3SpecResults}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+The 3.3V specification is worth discussing more extensively. Because a CubeSat is a system of systems, for a given CubeSat mission, there could be up to several dozen voltages the developers would want to monitor during the mission phase. Formally specifying these voltages doesn't vary from the 3.3V voltage monitor described in Specification 7 however, aside from the bounds assigned to the atomic propositions. Once a single voltage monitoring specification is written, all others match it almost perfectly. This can be seen with Specification 9 in Appendix D, which monitors the 8.3V supplied to the radio's battery. Aside from adjusting the lower and upper bounds, this specification is identical the the 3.3V voltage monitor.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.8\textwidth]{Fig/VBATT_Spec9.png}
+\caption{Results of running Specification 9, titled "Radio VBatt Voltage Variation", in R2U2 with multiple datasets. (a) Nominal performance with no change. (b) Multiple injected faults, considered false positives, are accounted for with temporal operators and do not indicate a fault. (c) Simulated failure of voltage supply, fault declared after multiple poor measurements indicates issue.}
+\label{3V3SpecResults}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 %%%%%%%%%%%%%%%%%%%%%
 
-
+The popularity of CubeSat projects is only expected to grow in the coming years, due mainly to their low cost and fast turnaround times. Without addressing the high rate of failure with these projects however, the common problems faced by developers will persist. Communications system failures have been described as one of the most common issues experienced in these projects, and such failures often lead to premature mission end. To aid in improved reliability of CubeSat communications systems, we have integrated the R2U2 runtime verification tool into two separate layers of the system: one within a ground station layer to monitor the CubeSat's orbit and connection, and one to monitor the CubeSat's telemetry. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
