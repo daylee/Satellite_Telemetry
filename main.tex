@@ -96,7 +96,7 @@ The system variables referring to all of the datasets in Figure \ref{OrbitalData
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=1\textwidth]{Fig/OrbitSimulationData.Updated5.png}
+\includegraphics[width=1\textwidth]{Fig/OrbitSimulationDataUpdated5.png}
 \caption{Datasets recorded during the orbital simulation. (a) The orbit number of the CubeSat throughout the simulation. (b) Binary representation of when line-of-sight (LOS) is achieved between the CubeSat and the ground station. (c) Binary representation of when the signal-to-noise ratio (SNR) is great enough during LOS that communication between the CubeSat and ground station is possible. (d) Estimated number of bits received by the ground station with a 9600 baud rate. (e) Azimuth angle of the CubeSat with respect to the ground station. (f) Elevation angle of the CubeSat with respect to the ground station.}
 \label{OrbitalDatasets}
 \end{figure}
@@ -220,7 +220,7 @@ Communication between the spacecraft and the ground station can only occur when 
 
 The azimuth angle of the spacecraft must always be bounded between -180$^{\circ}$ and 180$^{\circ}$. This information is easy to understand, considering the conventional spherical coordinate system. It is physically impossible in this coordinate system for a spacecraft to be located at an azimuth angle outside of this range. Any measurement outside of this range would certainly have to be either a bad data point, or the indication that some fault has occurred in the system. It is easy as humans to understand this requirement, but less so for a computer unless properly defined. With MLTL, we can more robustly express this requirement while accounting for the fact that at some point, an off-nominal data point will be measured. An atomic proposition exists for each of the bounds. Finally, we also specify a $\Delta$ value, indicating that the change in the azimuth angle of the spacecraft cannot change by more than 10$^{\circ}$ from the previous time step. If the spacecraft went from an azimuth angle of, say, -90$^{\circ}$ to 90$^{\circ}$ in one second, that would certainly be concerning. A third atomic proposition encodes this requirement. The full specification, reasoning over the length of the entire CubeSat's mission, is shown in Appendix D, Specification 2. A very similar specification is written for the elevation angle, but with different bounds owing to the spherical coordinate system.
 
-In addition to these two specifications, we also describe the bounds of the elevation angle in Appendix D, Specification 3, and a monitor for the number of orbits the CubeSat experiences, in Appendix D, Specification 4. (We additionally wrote a specification to monitor for the amount of theoretically received data, shown in Figure \ref{OrbitalDatasets}.d that is almost identical to Specification 4.?? Azimuth and Elevation plots don't look correct)
+In addition to these two specifications, we also describe the bounds of the elevation angle in Appendix D, Specification 3, and a monitor for the number of orbits the CubeSat experiences, in Appendix D, Specification 4. (We additionally wrote a specification to monitor for the amount of theoretically received data, shown in Figure \ref{OrbitalDatasets}.d that is almost identical to Specification 4.
 
 \subsection{Telemetry Specifications}
 
