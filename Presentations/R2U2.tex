@@ -1,0 +1,209 @@
+\documentclass[dvipsnames,svgnames]{beamer}
+
+
+%\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{alltt}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{wrapfig}
+\usepackage{cite}
+\usepackage{fixltx2e}
+\usepackage{url}
+\usepackage{float}
+\usepackage{framed}
+\usepackage{tikz}
+\usepackage{soul} %for \hl
+
+\usetikzlibrary{intersections}
+
+\usepackage{lipsum}
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
+%% \newcommand{\id}[1]{\mathit{#1}}                 % identifier
+%% \newcommand{\prob}[1]{\id{Pr}[#1]}
+%% \newcommand{\tlos}{T_{\id{LoS}}}
+%% \newcommand{\MSG}[1]{\textcolor{blue}{#1}}
+%% \newcommand{\Pair}[2]{\langle{#1}{,}{#2}\rangle}
+
+
+\newcommand{\tl}[1]{{\bf\textsf{#1}}}
+\newcommand{\tF}{\tl{F}}            % finally operator
+\newcommand{\tG}{\tl{G}}            % globally operator
+\newcommand{\tX}{\tl{X}}            % next operator
+\newcommand{\tY}{\tl{Y}}            % before operator
+\newcommand{\tU}{\tl{U}}            % until operator
+\newcommand{\tR}{\tl{R}}            % releases operator
+\newcommand{\tA}{\tl{A}}            % for all paths operator
+\newcommand{\tE}{\tl{E}}            % exists a path operator
+\newcommand{\tEF}{\tl{EF}}          % CTL EF operator
+\newcommand{\tEP}{\tl{EP}}          % CTL EP operator
+\newcommand{\tEG}{\tl{EG}}          % CTL EG operator
+\newcommand{\tEX}{\tl{EX}}          % CTL EX operator
+\newcommand{\tEU}{\tl{EU}}          % CTL EU operator
+\newcommand{\tER}{\tl{ER}}          % CTL ER operator
+\newcommand{\tAF}{\tl{AF}}          % CTL AF operator
+\newcommand{\tAG}{\tl{AG}}          % CTL AG operator
+\newcommand{\tAX}{\tl{AX}}          % CTL AX operator
+\newcommand{\tAU}{\tl{AU}}          % CTL AU operator
+\newcommand{\tAR}{\tl{AR}}          % CTL AR operator
+\newcommand{\id}[1]{\mathit{#1}}                 % identifier
+\newcommand{\prob}[1]{\id{Pr}[#1]}
+\newcommand{\tlos}{T_{\id{LoS}}}
+\newcommand{\MSG}[1]{\textcolor{blue}{#1}}
+\newcommand{\Pair}[2]{\langle{#1}{,}{#2}\rangle}
+
+
+
+\usetheme{KYRsplit}
+\usetheme{Darmstadt}
+
+\newcommand{\pspic}[2]{\scalebox{#1}{\includegraphics{#2}}}
+%\logo{\pspic{0.1}{ricecs}}
+
+%KYR: standardize phi
+\renewcommand{\phi}{\varphi}
+
+%\input{incDef.tex} %More definitions from TACAS paper
+
+
+%NO! \setbeamercovered{transparent}
+
+\setbeamersize{text margin right = 0.5cm}
+\setbeamersize{text margin left = 0.5cm}
+
+
+%KYR: vary indentation of itemized lists
+\newlength\origleftmargini
+\setlength\origleftmargini\leftmargini
+
+
+\title[\textcolor{white}{On-Board Runtime Reasoning}]{From Unmanned Aerial Systems \\ to Robonaut2: \\ On-board Runtime Reasoning \\ in Air and Space}
+\author{Kristin Yvonne Rozier}
+\date{January 9, 2020}
+
+
+\begin{document}
+
+
+\section{R2U2 Framework}
+\subsection{ } %make the dots appear at the top
+
+
+
+\begin{frame}
+\frametitle{Requirements}
+
+
+\noindent\textsc{\textcolor{RedViolet}{Realizability:}}
+\begin{itemize}
+%\item plug-and-play
+\item easy, \emph{\textcolor{RedViolet}{expressive}} specification language % to encode e.g. temporal relationships and flight rules.
+\item \emph{\textcolor{RedViolet}{generic}} interface to connect to a wide variety of systems
+\item \emph{\textcolor{RedViolet}{adaptable}} to missions, mission stages, platforms
+%\item able to \emph{\textcolor{RedViolet}{adapt}} to new specifications without a lengthy re-compilation
+%\item able to efficiently monitor different requirements during \emph{\textcolor{RedViolet}{different mission stages}}: \{takeoff, approach, measurement, return\}
+%[THOMAS:] We will have situations where we have several sections of a mission where we want to monitor different requirements. Like start, approaching target area, measurement, and return. For example, in the "measurement" phase we want to make sure that all instruments work as expected, but one might not be interesting in a very detailed monitoring of the propulsion subsystem.
+%\item able to run on standardized components \emph{\textcolor{RedViolet}{without interfering with flight certifiability}}
+\end{itemize}
+
+
+\noindent\textsc{\textcolor{RedViolet}{ Responsiveness:}} 
+\begin{itemize}
+\item \emph{\textcolor{RedViolet}{continuously monitor}} the system
+\item \emph{\textcolor{RedViolet}{detect deviations}} in \emph{real time}%from the monitored specifications within a tight and a priori known time bound
+\item \emph{\textcolor{RedViolet}{enable mitigation}} or rescue measures
+%  \begin{itemize}
+%    \item return to base for repair
+%    \item a controlled emergency landing to avoid damage on the ground
+%  \end{itemize}
+%This enables countermeasures (i.e., an emergency landing in case the flight computer fails) to avoid damage to the system and its environment.
+%\item report \emph{\textcolor{RedViolet}{intermediate status}} and satisfaction of timed requirements as early as possible (for decision-making)
+\end{itemize}
+   
+\noindent\textsc{\textcolor{RedViolet}{ Unobtrusiveness:}}
+\noindent
+%(not alter crucial properties of the system)
+\begin{itemize}
+%\item not alter crucial properties of the system
+\item \emph{\textcolor{RedViolet}{functionality}}: not change behavior
+\item \emph{\textcolor{RedViolet}{certifiability}}: avoid re-certification of flight software/hardware %($\Rrightarrow$ read-only access)
+\item \emph{\textcolor{RedViolet}{timing}}: not interfere with timing guarantees
+\item \emph{\textcolor{RedViolet}{tolerances}}: obey size, weight, power, telemetry bandwidth constraints
+%The framework must be able to run and perform analysis externally to the (previously developed and tested) Swift architecture.
+\item \emph{\textcolor{RedViolet}{cost}}: use commercial-off-the-shelf (COTS) components
+%\item  \emph{\textcolor{RedViolet}{tight time and budget constraints}}
+%\item require read-only access to the data from COTS components
+%Utilizing commercial-off-the-shelf (COTS) and previously proven system components is absolutely required to meet today's tight time and budget constraints; adding the SHM framework to the system must not alter these components as changes that require them to be re-certified cancel out the benefits of their use. Our goal is to create the most effective SHM %monitoring 
+%capability with the limitation of read-only access to the data from COTS components. %KYR: this addresses FMCAD reviewer #1
+\end{itemize}
+
+\end{frame}
+
+
+
+
+\begin{frame}
+\frametitle{Mission-Bounded Linear Temporal Logic \footnote{\tiny \textcolor{red}{T. Reinbacher, K.Y. Rozier, J. Schumann. ``Temporal-Logic Based Runtime Observer Pairs for System Health Management of Real-Time Systems.'' TACAS 2014.}}}
+
+{\bf Mission-Time Temporal Logic} (MLTL) reasons about \emph{integer-bounded} timelines:
+\begin{itemize}
+\item finite set of atomic propositions \{\textcolor{red}{p} \textcolor{blue}{q}\}
+\item Boolean connectives: $\neg$, $\wedge$, $\vee$, and $\rightarrow$
+\item temporal connectives \emph{with time bounds}: \\
+%\ \\
+\end{itemize}
+
+\footnotesize
+%\begin{center}
+\medskip \indent
+\begin{tabular}{lll}
+{\normalsize Symbol} & {\normalsize Operator} & {\normalsize Timeline} \\
+\hline \\[-0.8ex]
+\multirow{2}{*}{$\Box_{[2,6]} p$} &  \multirow{2}{*}{\textcolor{red}{$\textsc{Always}_{[2,6]}$}} &
+ \multirow{2}{*}{\pspic{0.3}{figs/G_2-6_p_timeline.pdf}}\\
+ & & \\
+\multirow{2}{*}{$\Diamond_{[0,7]} p$} & \multirow{2}{*}{\textcolor{red}{$\textsc{Eventually}_{[0,7]}$}} &
+\multirow{2}{*}{\pspic{0.3}{figs/F_5-7_p_timeline.pdf}}\\
+ & & \\
+\multirow{2}{*}{$p \mathcal{U}_{[1,5]} q$} & \multirow{2}{*}{\textcolor{red}{$\textsc{Until}_{[1,5]}$}}&
+\multirow{2}{*}{\pspic{0.3}{figs/pUq_1-5_timeline.pdf}}\\
+ & & \\
+\multirow{2}{*}{$p \mathcal{R}_{[3,8]} q$} &\multirow{2}{*}{\textcolor{red}{$\textsc{Release}_{[3,8]}$}} &
+\multirow{2}{*}{\pspic{0.3}{figs/pRq_3-8_timeline.pdf}}\\
+ & & \\
+\end{tabular}
+%\end{center}
+
+%% \begin{tabular}{lll}
+%%  $\mathcal{X} p$ & \textcolor{red}{\textsc{next time}} & %\pspic{0.3}{figs/X_p_timeline.jpg}\\
+%% \pspic{0.3}{figs/X_p_timeline.pdf}\\
+%% $\Box p$ & \textcolor{red}{\textsc{always}} & %\pspic{0.3}{figs/G_p_timeline.jpg}\\
+%% \pspic{0.3}{figs/G_p_timeline.pdf}\\
+%% $\Diamond p$ & \textcolor{red}{\textsc{eventually}} & %\pspic{0.3}{figs/F_p_timeline.jpg}\\
+%% \pspic{0.3}{figs/F_p_timeline.pdf}\\
+%% $p \mathcal{U} q$ & \textcolor{red}{\textsc{until}}& %\pspic{0.3}{figs/pUq_timeline.jpg}\\
+%% \pspic{0.3}{figs/pUq_timeline.pdf}\\
+%% $p \mathcal{R} q$ & \textcolor{red}{\textsc{release}} & %\pspic{0.3}{figs/pRq_timeline.jpg}\\
+%% \pspic{0.3}{figs/pRq_timeline.pdf}\\
+%% \end{tabular}
+
+\normalsize
+
+%\centerline{\structure{\emph{TAGLINE}}}
+%\medskip
+%\centerline{\structure{\emph{We proposed Mission-bounded LTL, an over-approximation for mission time $\tau$}}\footnote{\tiny T. Reinbacher, K.Y. Rozier, J. Schumann. ``Temporal-Logic Based Runtime Observer Pairs for System Health Management of Real-Time Systems.'' TACAS 2014.}}
+%CHECK: OVER APPROXIMATION???
+\end{frame}
+
+
+
+\end{document}
