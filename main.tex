@@ -1,9 +1,12 @@
 \documentclass[conf]{new-aiaa}
 %\documentclass[journal]{new-aiaa} for journal papers
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage{comment}
 \usepackage{graphicx}
 \usepackage{amsmath}
+%\usepackage[numbers,super]{natbib}
 \usepackage[version=4]{mhchem}
 \usepackage{siunitx}
 \usepackage{longtable,tabularx}
@@ -12,26 +15,26 @@
 \usepackage[tableposition=top]{caption}
 \usepackage{floatrow}
 \floatsetup[table]{capposition=top}
-
 \usepackage{xcolor}
 
 \lstset{basicstyle=\small\ttfamily,columns=flexible,breaklines=true}
 
-\title{A Case Study in Formal Specification and Runtime Verification of a CubeSat Communications System}
+\title{Formal Specification and Runtime Verification of a Communications System for CubeSats}
+%\title{A Case Study in Formal Specification and Runtime Verification of a CubeSat Communications System}
 
-%\author{First A. Author\footnote{Insert Job Title, Department Name, Address/Mail Stop, and AIAA Member Grade (if any) for first author.} and Second B. Author Jr.\footnote{Insert Job Title, Department Name, Address/Mail Stop, and AIAA Member Grade (if any) for second author.}}
-%\affil{Business or Academic Affiliation 1, City, State, Zip Code}
-%\author{Third C. Author\footnote{Insert Job Title, Department Name, Address/Mail Stop, and AIAA Member Grade (if any) for third author.}}
-%\affil{Business or Academic Affiliation 2, City, Province, Zip Code, Country}
-%\author{Fourth D. Author\footnote{Insert Job Title, Department Name, Address/Mail Stop, and AIAA Member Grade (if any) for fourth author (etc.).}}
-%\affil{Business or Academic Affiliation 2, City, State, Zip Code}
+\author{Zachary A. Luppen\footnote{Ph.D. Student, Aerospace Engineering, Iowa State University, Student Member.}}
+\affil{Iowa State University, zaluppen@iastate.edu}
+\author{Dae Young Lee\footnote{Assistant Professor, Aerospace Engineering, Iowa State University.}}
+\affil{Iowa State University, daylee@iastate.edu}
+\author{Kristin Y. Rozier\footnote{Professor, Aerospace Engineering, Iowa State University.}}
+\affil{Iowa State University, kyrozier@iastate.edu}
 
-\author{Zachary A. Luppen \footnote{Ph.D. student, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
+%\author{Zachary A. Luppen \footnote{Ph.D. student, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
 %\affil{Iowa State University, Ames, Iowa, 50011, USA.}
 %\affil{Iowa State University, Ames, Iowa, 50011, USA.}
-\author{Kristin Y. Rozier \footnote{Assistant Professor, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
-\author{Dae Young Lee \footnote{Assistant Professor, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
-\affil{Iowa State University, \{zaluppen,kyrozier,daylee\}@iastate.edu}
+%\author{Kristin Y. Rozier \footnote{Assistant Professor, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
+%\author{Dae Young Lee \footnote{Assistant Professor, Aerospace Engineering, Iowa State University, Ames, IA, 50010, USA.}}
+%\affil{Iowa State University, \{zaluppen,kyrozier,daylee\}@iastate.edu}
 
 \begin{document}
 
@@ -42,7 +45,7 @@
 CubeSats are garnering a lot of attention from several research communities due to their cheap price and easy accessibility to space. Although a CubeSat offers the potential to replace large and complex satellites for various space missions, developing a high-integrity platform that can fly in space requires robust software performance. The communications system of a CubeSat %and space systems 
 %-- and any other spacecraft mission for that matter -- 
 is critical to mission success. However, failed communications to the ground stations are commonplace for CubeSat projects. Thus robustifying against these potentially mission-ending failures poses one of the leading challenges for CubeSat missions both now and in the future. %The ability to detect faults in a CubeSat's communications system would aid in preventing a premature mission end as well as carry on the hard work performed by the developers.
-Runtime verification (RV) specializes in real-time error detection in these types of temporal, reactive systems, and the R2U2 verification engine proved to fit in the CubeSat's resource constraints. We design specifications to detect and trigger appropriate mitigations for communications system faults. We discuss communications system specification debugging, validation, and variable coverage. Experimental evaluation on simulated datasets demonstrates that running R2U2 within a CubeSat communications system would prevent several unique faults such as atypical position measurements or a voltage supply failure from occurring. We generalize our results and outline our plans for integrating runtime verification into other CubeSat systems as well as verifying an entire telemetry dataset.
+Runtime verification (RV) specializes in real-time error detection in these types of temporal, reactive systems, and the R2U2 verification engine proved to fit in the CubeSat's resource constraints. We design specifications to detect and trigger appropriate mitigations for communications system faults. We discuss communications system specification debugging, validation, and variable coverage. Experimental evaluation on simulated orbital and telemetry datasets demonstrates that running R2U2 within a CubeSat communications system would detect several unique faults and trigger mitigations for these such as atypical position measurements or a voltage supply failure from occurring. We provide a roadmap from large CubeSat datasets to specification patterns for automatically capturing common monitoring properties. We outline our plans for integrating RV into other CubeSat systems as well as verifying an entire CubeSat telemetry dataset.
 
 \end{abstract}
 
@@ -54,8 +57,7 @@ Runtime verification (RV) specializes in real-time error detection in these type
 \section{Introduction}
 %%%%%%%%%%%%%%%%%%%%%
 
-Over the past decade, the use of CubeSats and other nanosatellites by academic, governmental, commercial, and amateur entities has grown drastically \cite{cubesat101,Poghosyan2016,Villela2019}. The relatively low cost and fast development times of these projects make a CubeSat an ideal platform %I don't really understand how you're using the word platform here. It feels like "an ideal platform" might be more correct than "ideal platforms", but I'm not entirely sure.
-for accessing and experimenting in space \cite{cubesat101}. As of June 2020, over 1,300 CubeSats have been launched into space \cite{Kulu2020}. While CubeSats are limited in scope and resources and should not be considered replacements for flagship missions built by agencies such as NASA and ESA, their use is only expected to rise in the coming years \cite{Improving2017,cubesat101}. The low cost and short development times for these missions are appealing to space researchers, but they also produce constraints for these projects. CubeSats may offer a scaled-down, simplified platform for developers, but they still experience many of the same and more problems that large satellites do \cite{Improving2017}. Design flaws, poor workmanship, software bugs, low reliability of hardware (often consisting of commercial off-the-shelf (COTS) components), lack of adequate testing, and communications failures are among a few of the many problems CubeSat projects experience \cite{Improving2017}. %KYR: what does the following add to THIS paper? Many of these issues can be attributed to the cost and time constraints, such as parts quality, inadequate testing, and design flaws. Other problems are inherent with spacecraft projects, and will be faced by developers no matter the cost or time spent working on the mission.
+Over the past decade, the use of CubeSats and other nanosatellites by academic, governmental, commercial, and amateur entities has grown drastically \cite{cubesat101,Poghosyan2016,Villela2019}. The relatively low cost and fast development times of these projects make a CubeSat an ideal platform for accessing and experimenting in space \cite{cubesat101}. As of June 2020, over 1,300 CubeSats have been launched into space \cite{Kulu2020}. While CubeSats are limited in scope and resources and should not be considered replacements for flagship missions built by agencies such as NASA and ESA, their use is only expected to rise in the coming years \cite{Improving2017,cubesat101}. The low cost and short development times for these missions are appealing to space researchers, but they also produce constraints for these projects. CubeSats may offer a scaled-down, simplified platform for developers, but they still experience many of the same and more problems that large satellites do \cite{Improving2017}. Design flaws, poor workmanship, software bugs, low reliability of hardware (often consisting of commercial off-the-shelf (COTS) components), lack of adequate testing, and communications failures are among a few of the many problems CubeSat projects experience \cite{Improving2017}. %KYR: what does the following add to THIS paper? Many of these issues can be attributed to the cost and time constraints, such as parts quality, inadequate testing, and design flaws. Other problems are inherent with spacecraft projects, and will be faced by developers no matter the cost or time spent working on the mission.
 
 The communications system of a CubeSat is vital to mission success. A CubeSat could be performing invaluable science, but a failure to communicate the results back to the ground renders the mission pointless. Communications system failures are currently one of the most common problems experienced by CubeSat developers \cite{Improving2017,Langer2016}. The root causes of these failures are broad, having been attributed to lack of experience, poor design, incorrect link budgeting, electrical failures, as well as several other causes \cite{Improving2017,Langer2016}.
 %KYR: unnecessary: While communications systems have a higher likelihood to fail compared to other CubeSat subsystems, that does not make them any less crucial to mission success \cite{Improving2017}.
@@ -66,9 +68,14 @@ CubeSats are a relatively new platform, having only become widely used over the 
 system faults and errors with a CubeSat communications system. For this reason, applying formal methods to aid in CubeSat design presents an elaborate and as yet untouched field of work.
 
 We examine a CubeSat communication system model and overview its design and implementation. The model consists of two separate systems,%you say consisting too many times, since you say the model consists of two systems and then use it again describing each model. Replace the subsequent ones with words like "is comprised of", "replicates, imitates, etc.
-one consisting of orbital data (similar to information acquired by a ground station system) and the other consisting of telemetry information for a communications system module (simplified telemetry dataset containing information such as voltages and temperatures). Using the runtime specification classes described in \cite{Roz16} and expanded upon in \cite{Cauwels2020}, we develop, revise and validate formal specifications for these two systems and detail patterns observed during the process. To validate these specifications, we develop runtime observers within the Realizable, Responsive, Unobtrusive Unit (R2U2) tool and test them with the datasets generated by the model. To further verify their accuracy, we inject realistic faults -- such as unreasonable elevation and voltage measurements -- into the datasets at known times and check that they are identified when run with R2U2. We demonstrate how our specifications only produce alerts for valid failures, and not false positives and false negatives, which are currently one of the most prominent issues that NASA highlights when developing intelligent, autonomous systems \cite{Roadmap2015}. This case study provides a roadmap for developing a more robust CubeSat communications system and details the process for integrating runtime verification (RV) into such a system to provide autonomous verification of its operation.
+one consisting of orbital data (similar to information acquired by a ground station system) and the other consisting of telemetry information for a communications system module (simplified telemetry dataset containing information such as voltages and temperatures). Using methods described in \cite{Roz16} and expanded upon in \cite{Cauwels2020}, we develop, revise and validate formal specifications for these two systems and detail patterns observed during the process. To validate these specifications, we develop runtime observers within the Realizable, Responsive, Unobtrusive Unit (R2U2) tool and test them with the datasets generated by the model. To further verify their accuracy, we inject realistic faults -- such as unreasonable elevation and voltage measurements -- into the datasets at known times and check that they are identified when run with R2U2. We demonstrate how our specifications only produce alerts for valid failures, and not false positives and false negatives, which are currently one of the most prominent issues that NASA highlights when developing intelligent, autonomous systems \cite{Roadmap2015}. This case study provides a roadmap for developing a more robust CubeSat communications system and details the process for integrating runtime verification (RV) into such a system to provide autonomous verification of its operation.
 
 This paper is organized as follows. Section II provides an overview of the communications system model we have developed, along with the runtime verification foundations for it. Section III contains our formal specifications, relating to information sourced from a CubeSat telemetry dataset as well as a ground station. For future developers, we elucidate on the organization of the specifications, the need for temporal operators, discuss coverage, and note specific patterns we encountered during their creation. Section IV describes our test scenarios and output graphs from R2U2 for a handful of our specifications. Section V concludes with lessons learned during the specification development and testing process and discusses future steps for RV integration into CubeSat systems and telemetry analysis.
+
+% Produce CubeSat communications system model.
+% Develop a reference set of specifications in section 3.
+% Validate these specifications in section 4.
+% Discuss patterns and things we found in section 5.
 
 %%%%%%%%%%%%%%%%%%%%%
 \section{CubeSat Communications System Model}
