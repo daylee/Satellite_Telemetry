@@ -84,7 +84,7 @@ Our contributions are as follows:
   \item We discuss lessons learned from validating these specifications that may inform future CubeSat runtime verificaiton efforts.
 \end{enumerate}
 
-This paper is organized as follows. Section II provides an overview of our communications system model, dividing. Section III contains our formal specifications, relating to information sourced from a CubeSat telemetry dataset as well as a ground station. For future developers, we elucidate on the organization of the specifications, the need for temporal operators, discuss coverage, and note specific patterns we encountered during their creation. Section IV describes our test scenarios and output graphs from R2U2 for a handful of our specifications. Section V concludes with lessons learned during the specification development and testing process and discusses future steps for RV integration into CubeSat systems and telemetry analysis.
+This paper is organized as follows. Section \ref{CCSM} provides an overview of our communications system model, dividing. Section \ref{CSRS} contains our formal specifications, relating to information sourced from a CubeSat telemetry dataset as well as a ground station. For future developers, we elucidate on the organization of the specifications, the need for temporal operators, and note specific patterns we encountered during their creation. Section \ref{Results} describes our test scenarios, output graphs from R2U2 for a handful of our specifications. In section \ref{Discussion}, we describe variable coverage of the specifications, additional tools used by developers with communications systems, and discuss the limitations of the communications system model. Section \ref{Conclusion} concludes with lessons learned during the specification development and testing process and discusses future steps for RV integration into CubeSat systems and telemetry analysis.
 
 % What do we do in this paper? So the contributions are, 1 Produce CubeSat communications system model.
 % Develop a reference set of specifications in section 3.
@@ -114,7 +114,7 @@ This paper is organized as follows. Section II provides an overview of our commu
 
 
 %%%%%%%%%%%%%%%%%%%%%
-\section{CubeSat Communications System Model}
+\section{CubeSat Communications System Model} \label{CCSM}
 %%%%%%%%%%%%%%%%%%%%%
 
 We created, tested, and evaluated a model of the Wertz CubeSat communications system \cite{SMAD} using MATLAB/Simulink as well as software-defined radio (SDR) hardware to provide real communication between transmitting and receiving antennas. We decompose the model into three sub-systems: orbital simulation (Section \ref{ref:orbital}), simulated communications (Section \ref{ref:comm}), and radio transmission (Section \ref{ref:radio}). 
@@ -259,7 +259,7 @@ This decoder outputs the telemetry message, which is then organized into a comma
 %For a given CubeSat mission, the received telemetry is the crucial bit of information used to determine whether or not the CubeSat is in a healthy state. In order to make that determination, that telemetry needs to be correct. But how do we determine that? How do we keep track of potentially hundreds of system variables in order to understand our system's performance? How can we differentiate between a system failure and a simple bad data collection, or perhaps a bad bit that wasn't communicated correctly? When do we know the information we're receiving is just a false positive or false negative? Without accurate information, we cannot reason about the system to determine its state, and what, if anything, needs to be done to solve the problems it could be facing. In the next section, we implement a methodology using techniques from the field of formal methods that addresses this issue, and evaluates the performance of our communications system model.
 
 %%%%%%%%%%%%%%%%%%%%%
-\section{Communications System Runtime Specifications}
+\section{Communications System Runtime Specifications}  \label{CSRS}
 %%%%%%%%%%%%%%%%%%%%%
 
 In this section, we discuss both subsystems of our CubeSat communications model and the process for encoding their requirements into temporal logic. Specific challenges with incorporating RV via the R2U2 tool are highlighted. We discuss multiple methods for validating our specifications and point out specific patterns that we observed during their development and testing.
@@ -440,7 +440,7 @@ The number won't necessarily be greater by exactly 1, since the ground station c
 
 %First, we examine the operation of the communications system. A specification is often sourced from previous documentation or reasoning about a similar system, but that is not always the case.
 
-\section{Results}
+\section{Results}  \label{Results}
 
 The simulated communications system we have developed for this case study monitors and outputs orbital data and simulated CubeSat telemetry during a weeklong simulation period. In this section, we compare this data offline, apart from the simulation, against the designed MLTL specifications using the R2U2 tool. In particular, we examine the time necessary to locate faults within these datasets, the amount of memory required by the tool while processing, and other additional statistics detailing the resources required to verify system performance. The R2U2 tool is not integrated into the model due to being run offline. Post-simulation, the data is run through a pre-processing layer that maps multiple inputs into a single Boolean atomic input for R2U2, which is described in further detail in \cite{Cauwels2020}. This methodology provides lower precision than embedding the tool but greatly simplifies the verdicts that it returns.
 
@@ -515,7 +515,7 @@ Figure \ref{VBATTSpecResults} shows the radio battery voltage measurement throug
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%
-\section{Discussion}
+\section{Discussion}  \label{Discussion}
 %%%%%%%%%%%%%%%%%%%%%
 
 All but two of the variables comprising the orbital dataset are formally specified, the \texttt{Time} and the \texttt{Received} data. The received data acts as a simple measure of bits%this doesn't feel clear
@@ -545,7 +545,7 @@ While we have discussed implementing RV into a CubeSat communications system to 
 
 
 %%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion}
+\section{Conclusion}  \label{Conclusion}
 %%%%%%%%%%%%%%%%%%%%%
 
 The popularity of CubeSat projects is only expected to grow in the coming years, due mainly to their low cost and fast turnaround times. However, without addressing the high rate of failure of these projects, the common problems faced by developers will persist. Communications system failures have been described as one of the most common issues experienced in CubeSat projects, and such failures often lead to premature mission end. To aid in improved reliability of CubeSat communications systems, we have integrated the R2U2 runtime verification tool into two separate layers of the system: one within a ground station layer to monitor the CubeSat's orbit and connection, and one to monitor the CubeSat's telemetry. We provide a small reference set of specifications for these two separate aspects of the communications system, demonstrating their correctness by validating the model's system parameters offline. While we were limited by the model developed for this case study, we discuss how our work could be expanded for a real CubeSat mission.
