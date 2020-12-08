@@ -275,13 +275,14 @@ When writing our specifications, we consider the runtime specification patterns 
 
 The orbital simulation dataset defines updates at a time resolution of one second between measurements due to the ordinary differential equation (ODE) solver used to produce this dataset. Because so many constants and unchanging values define this part of the model, we actually need relatively few verificaiton specifications. These specifications stem from a basic understanding of how communications systems operate as well as an understanding of spherical geometry. We discuss two of these specifications in-depth. 
 
-Communication between the spacecraft and the ground station can only occur when the spacecraft is above the horizon. If the CubeSat and ground station cannot are not within line-of-sight of each other, then communication cannot occur. Such a situation would be physically impossible, but these bounds are not automatically assumed by a computer. We therefore define this requirement in MLTL, with an atomic proposition indicating the elevation of the CubeSat must be greater than 0. An additional atomic proposition is written when successful communication takes place, indicated when the value of CONN is 1. The full specification, reasoning over the length of the entire CubeSat's mission, is shown in Specification 1. This specification ensures that communication is only taking place when physically possible, and any measurement indicating otherwise would indicate an issue with measuring the position of the craft.
+Communication between the spacecraft and the ground station can only occur when the spacecraft is above the horizon. If the CubeSat and ground station are not within line-of-sight of each other, then communication cannot occur. Such a situation would be physically impossible, but these bounds are not automatically assumed by an automated system. We therefore define this requirement in MLTL, with an atomic proposition indicating the elevation of the CubeSat must be greater than 0. An additional atomic proposition indicates when successful communication takes place, when the value of CONN is 1. The full specification, reasoning over the length of the entire CubeSat's mission, is shown in Specification \ref{los}. This specification ensures that communication only takes place when physically possible, and any measurement indicating otherwise can be flagged by the RV engine as an issue with measuring the position of the craft.
 
-The azimuth angle of the spacecraft must always be bounded between -180$^{\circ}$ and 180$^{\circ}$. This information is easy to understand, considering the conventional spherical coordinate system. It is physically impossible in this coordinate system for a spacecraft to be located at an azimuth angle outside of this range. Any measurement outside of this range would certainly have to be either a bad data point, or the indication that some fault has occurred in the system. It is easy as humans to understand this requirement, but less so for a computer unless properly defined. With MLTL, we can more robustly express this requirement while accounting for the fact that at some point, an off-nominal data point will be measured. An atomic proposition exists for each of the bounds. Finally, we also specify a $\Delta$ value, indicating that the change in the azimuth angle of the spacecraft cannot change by more than 10$^{\circ}$ from the previous time step. If the spacecraft went from an azimuth angle of, say, -90$^{\circ}$ to 90$^{\circ}$ in one second, that would certainly be concerning. A third atomic proposition encodes this requirement. The full specification, reasoning over the length of the entire CubeSat's mission, is shown in Specification 2. A very similar specification is written for the elevation angle, but with different bounds owing to the spherical coordinate system.
+The azimuth angle of the spacecraft must always be bounded between -180$^{\circ}$ and 180$^{\circ}$. This information is easy to understand, considering the conventional spherical coordinate system. It is physically impossible in this coordinate system for a spacecraft to be located at an azimuth angle outside of this range. Any measurement outside of this range would certainly have to be either a bad data point, or the indication that some fault has occurred in the system. It is easy as humans to assume this requirement, but we must explicitly specify it for our autonomous CubeSat. With MLTL, we can robustly express this requirement while accounting for liklihood of off-nominal data points, e.g., from sensor noise. We declare atomic propositions for each of the bounds. Finally, we also specify a $\Delta$ value, indicating that the change in the azimuth angle of the spacecraft cannot change by more than 10$^{\circ}$ from the previous time step. If the spacecraft went from an azimuth angle of, say, -90$^{\circ}$ to 90$^{\circ}$ in one second, that would certainly be concerning. A third atomic proposition encodes this requirement. The full specification, reasoning over the length of the entire CubeSat's mission, appears in Specification \ref{azimuth}. We write a very similar specification for the elevation angle, but with different bounds owing to the spherical coordinate system.
 
-In addition to these two specifications, we also describe the bounds of the elevation angle in Specification 3, and a monitor for the number of orbits the CubeSat experiences, in Specification 4. (We additionally wrote a specification to monitor for the amount of theoretically received data, shown in Figure \ref{OrbitalDatasets}.d that is almost identical to Specification 4.
+In addition to these specifications, we also describe the bounds of the elevation angle in Specification \ref{ele}, and a monitor for the number of orbits the CubeSat experiences, in Specification \ref{onc}. (We additionally wrote a specification to monitor for the amount of theoretically received data, shown in Figure \ref{OrbitalDatasets}.d that is almost identical to Specification \ref{onc}.
 
 \subsubsection{\textbf{Necessity of Line-of-Sight Communication}}
+\label{los}
 “Communication between the spacecraft and ground station can only occur when the spacecraft is above the horizon, i.e., the elevation angle of the spacecraft must be above 0. (Line of sight conditions are met.)"
 \[ Atomic\:Propositions \begin{cases}
   \varphi_1 & (El_{SAT} > 0) \\
@@ -294,6 +295,7 @@ In addition to these two specifications, we also describe the bounds of the elev
 This specification stems from common sense, as there must be line of sight between the CubeSat and the ground station.
 
 \subsubsection{\textbf{Azimuth Angle Bounds}}
+\label{azimuth}
 “The azimuth angle of the CubeSat, Az$_{SAT}$, will be bounded by 0 and 360 at all instances. The current value of Az$_{SAT}$ will not vary more than 1$^{\circ}$ from the previous time step."
 \[ Atomic\:Propositions \begin{cases}
   \varphi_1 & (Az_{SAT} \geq -180) \\
@@ -306,6 +308,7 @@ This specification stems from common sense, as there must be line of sight betwe
 \end{equation} 
 
 \subsubsection{\textbf{Elevation Angle Bounds}}
+\label{ele}
 “The elevation angle of the CubeSat, El$_{SAT}$, will be bounded by -90 and 90 at all instances."
 \[ Atomic\:Propositions \begin{cases}
   \varphi_1 & (El_{SAT} \geq -90) \\
@@ -318,6 +321,7 @@ This specification stems from common sense, as there must be line of sight betwe
 \end{equation} 
 
 \subsubsection{\textbf{Orbit Number Check}}
+\label{onc}
 “The orbit number of the spacecraft provided by the model will never be less than 0. The orbit number of the current time step will be equal to or greater than the orbit number from the previous time step."
 \[ Atomic\:Propositions \begin{cases}
   \varphi_1 & (OrbNum \geq 0) \\
@@ -330,11 +334,11 @@ This specification stems from common sense, as there must be line of sight betwe
 This information is crucial to knowing how many passes the CubeSat has made, and also acts as a check to ensure the information pulled from the model is sensible.
 
 \subsection{Telemetry Specifications}
-\ref{telemspec}
+\label{telemspec}
 
-Specifications of the telemetry variables are written with bounds commonly used by CubeSat developers. Developers tend to use component specification sheets when testing their systems, and use the bounds described in those sheets for validating their work. Because the data sheet component specifications often end up acting as requirements when testing the CubeSat, the same methods are applied here.%The previous sentence is unclear; it doesn't tell me what exactly you "applied here"
+CubeSat developers tend to use component specification sheets when testing their systems, and use the bounds described in those sheets for validating their work. Because the data sheet component specifications often end up acting as requirements when testing the CubeSat, we use them to write our specifications of the telemetry variables.
 
-When considering voltage lines powering CubeSat systems, a tolerance of $\pm$10$\%$ is generally accepted. Unless switched into another state, voltage lines commonly remain active during the mission. Therefore, we write the following specification. The radio 3.3V line must not vary more than 10$\%$ from the desired 3.3V value. The upper and lower bounds are each encoded into atomic propositions. We also consider the case where the measured voltage is within these bounds but may experience oscillation. For this reason, a third atomic proposition is written indicating that the voltage measurement must not vary more than .5V from the previous time step. The full specification, reasoning over the length of the entire CubeSat's mission, is shown in Specification 7. Such a specification is useful for any voltage that is measured and added to the telemetry message, and a similar form exists for measured currents and temperatures as well.
+When considering voltage lines powering CubeSat systems, developers generally accept a tolerance of $\pm$10$\%$. Unless switched into another state, voltage lines commonly remain active during the mission. Therefore, we write the following specification. The radio 3.3V line must not vary more than 10$\%$ from the desired 3.3V value. The upper and lower bounds are each encoded into atomic propositions. We also consider the case where the measured voltage is within these bounds but may experience oscillation. For this reason, we define a third atomic proposition indicating that the voltage measurement must not vary more than .5V from the previous time step. The full specification, reasoning over the length of the entire CubeSat's mission, appears in Specification \ref{rvv}. Such a specification is useful for any voltage that is measured and added to the telemetry message, and a similar form exists for measured currents and temperatures as well.
 
 The sample telemetry also lists the number of times that the CubeSat's on-board radio has transmitted. This is an interesting piece of information since it alerts ground station operators as to how many times the radio is attempting to communicate, and if whether or not those communications are received. We write the following specification: the number of times the CubeSat transmits to the ground station will be greater than the previous time the transmission was received. This is another situation where common sense is helpful. We know that the transmit count should be higher between one transmission and the next, but we don't necessarily know if that transmission was the next one to be sent. Hence, keeping track of the radio transmit counts sheds light on how often communication occurs. This specification is encoded into a single atomic proposition without a temporal operator, since each successive measurement of the transmit count should be higher. The full specification, reasoning over the length of the entire CubeSat's mission, is shown in Specification 11. Such a specification is useful for understanding the time evolution of CubeSat telemetry, and diagnosing how effective the communications system is.
 
@@ -361,6 +365,7 @@ We have also written specifications for different temperatures of the radio syst
 \end{equation} 
 
 \subsubsection{\textbf{Radio 3.3V Voltage Variation}}
+\label{rvv}
 “The Radio 3.3V line, 3.3VRadioVolt, must not vary more than 10\% from the desired 3.3V value. It must also not vary more than .5V from the previous time step."
 \[ Atomic\:Propositions \begin{cases}
   \varphi_1 & (3.3VRadioVolt \geq 2.97V) \\
@@ -373,6 +378,7 @@ We have also written specifications for different temperatures of the radio syst
 \end{equation} 
 
 \subsubsection{\textbf{Radio 3.3V Current Variation}}
+\label{}
 “The Radio 3.3V line must not have a current, 3.3VRadioCurr, varying more than 5\% from
 the desired current value, 3.3VRadioExpCurr. It must also not vary more than .05A from the value of the previous time step."
 \[ Atomic\:Propositions \begin{cases}
@@ -386,6 +392,7 @@ the desired current value, 3.3VRadioExpCurr. It must also not vary more than .05
 \end{equation} 
 
 \subsubsection{\textbf{Radio VBatt Voltage Variation}}
+\label{}
 “The Radio VBatt voltage, RadioVBattVolt, must not vary more than 10\% from the desired 8.3V value. It must also not vary more than .5V from the previous time step."
 \[ Atomic\:Propositions \begin{cases}
   \varphi_1 & (RadioVBattVolt \geq 7.47V) \\
