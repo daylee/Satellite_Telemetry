@@ -275,6 +275,54 @@ The azimuth angle of the spacecraft must always be bounded between -180$^{\circ}
 
 In addition to these two specifications, we also describe the bounds of the elevation angle in Appendix D, Specification 3, and a monitor for the number of orbits the CubeSat experiences, in Appendix D, Specification 4. (We additionally wrote a specification to monitor for the amount of theoretically received data, shown in Figure \ref{OrbitalDatasets}.d that is almost identical to Specification 4.
 
+\subsubsection{\textbf{Necessity of Line-of-Sight Communication}}
+“Communication between the spacecraft and ground station can only occur when the spacecraft is above the horizon, ie. the elevation angle of the spacecraft must be above 0. (Line of sight conditions are met.)"
+\[ Atomic\:Propositions \begin{cases}
+  \varphi_1 & (El_{SAT} > 0) \\
+  \varphi_2 & CONN == 1) \\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 1}
+    G_{[0,M]} \{(G_{[0,3]}(\varphi_2 \rightarrow \varphi_1))\}
+\end{equation} 
+This specification stems from common sense, as there must be line of sight between the CubeSat and the ground station.
+
+\subsubsection{\textbf{Azimuth Angle Bounds}}
+“The azimuth angle of the CubeSat, Az$_{SAT}$, will be bounded by 0 and 360 at all instances. The current value of Az$_{SAT}$ will not vary more than 1$^{\circ}$ from the previous time step."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi_1 & (Az_{SAT} \geq -180) \\
+  \varphi_2 & (Az_{SAT} \leq 180) \\
+  \psi & (abs(Az_{SAT} - Az_{SAT(i-1)}) < 1.0) \\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 2}
+    G_{[0,M]} \{(G_{[0,3]}(\varphi_1 \wedge \varphi_2 \wedge \psi))\}
+\end{equation} 
+
+\subsubsection{\textbf{Elevation Angle Bounds}}
+“The elevation angle of the CubeSat, El$_{SAT}$, will be bounded by -90 and 90 at all instances."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi_1 & (El_{SAT} \geq -90) \\
+  \varphi_2 & (El_{SAT} \leq 90) \\
+  \psi & (abs(El_{SAT} - El_{SAT(i-1)}) < 1.0) \\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 3}
+    G_{[0,M]} \{(\varphi_1 \wedge \varphi_2 \wedge \psi)\}
+\end{equation} 
+
+\subsubsection{\textbf{Orbit Number Check}}
+“The orbit number of the spacecraft provided by the model will never be less than 0. The orbit number of the current time step will be equal to or greater than the orbit number from the previous time step."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi_1 & (OrbNum \geq 0) \\
+  \psi_1 & (OrbNum \geq OrbNum_{i-1})\\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 4}
+    G_{[0,M]} \{(\varphi_1 \wedge \psi_1)\}
+\end{equation} 
+This information is crucial to knowing how many passes the CubeSat has made, and also acts as a check to ensure the information pulled from the model is sensible.
+
 \subsection{Telemetry Specifications}
 
 Specifications of the telemetry variables are written with bounds commonly used by CubeSat developers. Developers tend to use component specification sheets when testing their systems, and use the bounds described in those sheets for validating their work. Because the data sheet component specifications often end up acting as requirements when testing the CubeSat, the same methods are applied here.%The previous sentence is unclear; it doesn't tell me what exactly you "applied here"
@@ -284,6 +332,99 @@ When considering voltage lines powering CubeSat systems, a tolerance of $\pm$10$
 The sample telemetry also lists the number of times that the CubeSat's on-board radio has transmitted. This is an interesting piece of information since it alerts ground station operators as to how many times the radio is attempting to communicate, and if whether or not those communications are received. We write the following specification: the number of times the CubeSat transmits to the ground station will be greater than the previous time the transmission was received. This is another situation where common sense is helpful. We know that the transmit count should be higher between one transmission and the next, but we don't necessarily know if that transmission was the next one to be sent. Hence, keeping track of the radio transmit counts sheds light on how often communication occurs. This specification is encoded into a single atomic proposition without a temporal operator, since each successive measurement of the transmit count should be higher. The full specification, reasoning over the length of the entire CubeSat's mission, is shown in Appendix D, Specification 11. Such a specification is useful for understanding the time evolution of CubeSat telemetry, and diagnosing how effective the communications system is.
 
 We have also written specifications for different temperatures of the radio systems, shown in Specifications 5 and 6 in Appendix D. Current variation for the 3.3V source and Battery Voltage are shown in Specifications 8 and 10 in Appendix D. Similar to Specification 11, we also look at the number of operations the CubeSat's radio performs, detailed in Specification 12 in Appendix D.
+
+\subsubsection{\textbf{Radio Temperature Variation}}
+“The temperature of the radio, Radio\_PA\_Temp, will not vary more 1$^{\circ}$ from the previous time step."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi & (abs(Radio\_Temp - Radio\_Temp_{i-1} \leq 1.0)) \\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 5}
+    G_{[0,M]} \{(\varphi)\}
+\end{equation} 
+
+\subsubsection{\textbf{Radio Power Amplifier Temperature Variation}}
+“The temperature of the radio's power amplifier, Radio\_PA\_Temp, will not vary more 1$^{\circ}$ from the previous time step."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi & (abs(Radio\_PA\_Temp - Radio\_PA\_Temp_{i-1} \leq 1.0)) \\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 6}
+    G_{[0,M]} \{(\varphi)\}
+\end{equation} 
+
+\subsubsection{\textbf{Radio 3.3V Voltage Variation}}
+“The Radio 3.3V line, 3.3VRadioVolt, must not vary more than 10\% from the desired 3.3V value. It must also not vary more than .5V from the previous time step."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi_1 & (3.3VRadioVolt \geq 2.97V) \\
+  \varphi_2 & (3.3VRadioVolt \leq 3.63V) \\
+  \psi & (abs(3.3VRadioVolt - 3.3VRadioVolt_{i-1}) < .5)\\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 7}
+    G_{[0,M]} \{G_{[0,3]}(\varphi_1 \wedge \varphi_2 \wedge \psi))\}
+\end{equation} 
+
+\subsubsection{\textbf{Radio 3.3V Current Variation}}
+“The Radio 3.3V line must not have a current, 3.3VRadioCurr, varying more than 5\% from
+the desired current value, 3.3VRadioExpCurr. It must also not vary more than .05A from the value of the previous time step."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi_1 & (3.3VRadioCurr \geq .95*3.3VRadioExpCurr) \\
+  \varphi_2 & (3.3VRadioCurr \leq 1.05*3.3VRadioExpCurr) \\
+  \psi & (abs(3.3VRadioCurr - 3.3VRadioCurr_{i-1}) \leq .05)\\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 8}
+    G_{[0,M]} \{(\varphi_1 \wedge \varphi_2 \wedge \psi)\}
+\end{equation} 
+
+\subsubsection{\textbf{Radio VBatt Voltage Variation}}
+“The Radio VBatt voltage, RadioVBattVolt, must not vary more than 10\% from the desired 8.3V value. It must also not vary more than .5V from the previous time step."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi_1 & (RadioVBattVolt \geq 7.47V) \\
+  \varphi_2 & (RadioVBattVolt \leq 9.13V) \\
+  \psi & (abs(RadioVBattVolt - RadioVBattVolt_{i-1}) < .5)\\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 9}
+    G_{[0,M]} \{(\varphi_1 \wedge \varphi_2 \wedge \psi)\}
+\end{equation} 
+
+\subsubsection{\textbf{Radio VBatt Current Variation}}
+“The Radio VBatt voltage line must not have a current, RadioVBattCurr, varying more than 5\% from the desired current value, RadioVBattCurrExp. It must also not vary more than .05A from the value of the previous time step."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi_1 & (RadioVBattCurr \geq .95*RadioVBattCurrExp) \\
+  \varphi_2 & (RadioVBattCurr \leq 1.05*RadioVBattCurrExp) \\
+  \psi & (abs(RadioVBattCurr - RadioVBattCurr_{i-1}) \leq .05)\\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 10}
+    G_{[0,M]} \{(\varphi_1 \wedge \varphi_2 \wedge \psi)\}
+\end{equation} 
+
+\subsubsection{\textbf{Transmit Count Check}}
+“The number of times the CubeSat transmits to the ground station, Radio\_TX, will be greater than the previous time the transmission was received."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi & (Radio\_TX > Radio\_TX_{i-1})\\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 11}
+    G_{[0,M]} \{(\varphi)\}
+\end{equation} 
+
+The number won't necessarily be greater by exactly 1, since the ground station could conceivably not receive a transmission.
+
+\subsubsection{\textbf{Operation Count Check}}
+“The number of times the CubeSat performs operations, Radio\_Op\_Count, will be greater than the previous time the transmission was received."
+\[ Atomic\:Propositions \begin{cases}
+  \varphi & (Radio\_Op\_Count > Radio\_Op\_Count_{i-1})\\
+\end{cases} \]
+\begin{equation}
+    \label{Spec 12}
+    G_{[0,M]} \{(\varphi)\}
+\end{equation} 
+
+The number won't necessarily be greater by exactly 1, since the ground station could conceivably not receive a transmission.
 
 %A specification describes the desired performance of some aspect of a system. Here, we examine the performance of the simulated communications system particularly with aspects involving transmit/receive operations, measurement of parameters during radio operation, and CubeSat communications monitoring. Since specification is the biggest bottleneck in the design of robust embedded systems \cite{Roz17}, and since formal specification can be a very enlightening activity for the system design process, we treat this as an activity unto itself.\\
 
