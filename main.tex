@@ -117,9 +117,10 @@ This paper is organized as follows. Section II provides an overview of our commu
 \section{CubeSat Communications System Model}
 %%%%%%%%%%%%%%%%%%%%%
 
-We created, tested and evaluated a model of a CubeSat communications system for the work described in this case study. This model was created using MATLAB/Simulink as well as software-defined radio (SDR) hardware to provide real communication between transmitting and receiving antennas. In the subsections below, we discuss the three major components of this model in-depth.
+We created, tested, and evaluated a model of the Wertz CubeSat communications system \cite{SMAD} using MATLAB/Simulink as well as software-defined radio (SDR) hardware to provide real communication between transmitting and receiving antennas. We decompose the model into three sub-systems: orbital simulation (Sec. \ref{ref:orbital}, simulated communications \ref{ref:comm}, and radio transmission \ref{ref:radio}. 
 
 \subsection{Orbital Simulation}
+\label{ref:orbital}
 
 We utilize the MathWorks Aerospace Blockset CubeSat Simulation Library in MATLAB/Simulink to develop a simulated CubeSat orbiting the Earth \cite{MATLAB:2019}. This library provides a robust set of functions that can be used to model, simulate and analyze the orbit and attitude dynamics of CubeSats \cite{AerospaceBlockset}. The CubeSat Vehicle Model block diagram provided by the library is able to perform this simulation once a specified set of Keplerian orbital parameters (eccentricity, semi-major axis, inclination, right ascension of the ascending node, etc.) are passed to it \cite{AerospaceModeling}. An orbital model of a CubeSat vehicle is then generated according to these parameters and placed into a spherical harmonic gravitation model representing Earth's gravity. When the Simulink model is run using an ordinary differential equations (ODE) solver, it outputs the position and velocity of the craft at the next time step, along with the quaternion between ECI to Body frames. This movement is animated using the Simulink 3D Animation block, as shown in Figure \ref{OrbitalAnimation} and then the process is repeated with the new position and attitude values.
 
@@ -177,7 +178,8 @@ The system variables referring to all of the datasets in Figure \ref{OrbitalData
 \label{GroundStationVariables}
 \end{table}
 
-\subsection{Communications Simulation}
+\subsection{Simulated Communicaitons}
+\label{ref:comm}
 
 When designing a real CubeSat communications system, developers typically perform link budgeting early to determine several properties in their communications system \cite{daylee2018}. These calculations aid in understanding the gain and power requirements for the transmitting and receiving antennas of the system and are a primary factor in determining what kind of equipment is necessary to build a communication link. Link budgeting is not an exact science, since the main equations assume an ideal system \cite{Zyren1998}, but it is commonly used by CubeSat developers. Because we are simulating a communications system for this case study, we model the antenna directly first and then calculate the link during the simulation.
 
@@ -196,6 +198,7 @@ where E$_{b}$/N$_{o}$ is the ratio of received energy per bit to noise-density,
 $P$ is the power of the transmitter, $G_t$ is the TX antenna gain, $L_l$ is the transmitter-to-antenna line loss, $L_{pr}$ is the receiving antenna pointing loss, $L_s$ is the space loss, $L_a$ is the propagation and polarization loss, $G_r$ is the RX antenna gain, $T_s$ is the system noise temperature, and $R$ is the data rate of the link \citep{Wertz1999}. The value of $L_s$ changes greatly as the CubeSat orbits, and is therefore an important parameters in this calculation. $L_{pt}$ and $L_{pr}$ also play an important role, since accurate pointing is necessary for directional antennas. The term $L_a$ is a function of factors consisting of atmospheric and precipitation-induced losses, and is assumed to be negligible in the model.
 
 \subsection{Radio Transmission}
+\label{ref:radio}
 
 The radio transmission portion of the model can be considered a component of the communications simulation. It uses a Universal Software Radio Peripheral (USRP) B210 software-defined radio (SDR) from Ettus Research to perform quaternary phase-shift keying transmission and reception of sample telemetry data, as if a CubeSat were transmitting to the ground station. This portion of the model is built using the MathWorks Communications Toolbox \cite{CommunicationsToolbox}. Telemetry is broadcasted from the transmitting antenna to the receiving antenna when the communication status, shown in Figure \ref{OrbitalDatasets}.c is active. The transmission takes place specifically at each time step where the communication status goes from inactive to active.
 
