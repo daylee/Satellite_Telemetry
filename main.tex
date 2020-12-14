@@ -16,6 +16,7 @@
 \usepackage{floatrow}
 \floatsetup[table]{capposition=top}
 \usepackage{xcolor}
+\usepackage{amssymb}
 
 \lstset{basicstyle=\small\ttfamily,columns=flexible,breaklines=true}
 
@@ -112,6 +113,78 @@ This paper is organized as follows. Section \ref{CCSM} provides an overview of o
 
 %Set the story. Every sentence needs to contribute to the center line and lead in a good fairy tale novel. 
 
+%%%%%%%%%%%%%%%%%%%%%
+\section{Preliminaries} \label{Preliminaries}
+%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{CubeSats}
+
+Small satellites are divided into classes based on total mass, such as nanosatellites, picosatellites, and femtosatellites. These low-cost, small spacecraft platforms have cheapened access to space experimentation \cite{Toorian2008}. Cube satellites earn their name due to the modular nature of their sizes. The normal size of a CubeSat is 10cm x 10cm x 10cm, normally referred to as a size of 1U \cite{cubesat101}. CubeSats are not limited to this size however, and can be composed of multiple U units of size. Figure \ref{CubeSatModel} shows a 3U CubeSat. The term "CubeSat" used throughout this case study refers to these small satellites collectively. A typical CubeSat consists of a flight computer, communications system, ADCS, electrical power supply (EPS) and an experimental payload \cite{cubesat101}. A CubeSat is a complex system of systems; the flight computer controls and manages each of the other subsystems throughout a mission. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.5\textwidth]{Fig/CySat.png}
+\caption{A 3d model of a CubeSat of size 3U.}
+\label{CubeSatModel}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{MLTL}
+% Write with CubeSat developers in mind. They don't know what MLTL is.
+
+The R2U2 tool reasons over specifications written in mission-time linear temporal logic (MLTL) \cite{LVR19,RRS14}. Temporal logic is used to formally describe requirements for a system.
+
+\vspace{\baselineskip}
+
+\textbf{Definition 1.} \textit{(MLTL Syntax) The syntax of an MLTL formula $\phi$ using a set of atomic propositions $\mathcal{AP}$ is recursively defined as the following:}
+
+\begin{equation}
+\phi ::= true \; | \; false \; | \; p \; | \; \neg \phi \; | \; \phi_1 \land \phi_2 \; | \; \phi_1 \lor \phi_2 \; | \; \Box_I \phi \; | \; \Diamond_I \phi \; | \; \phi_1 \mathcal{U}_I \phi_2 \; |  \; \phi_1 \mathcal{R}_I \phi_2
+\end{equation}
+
+where p $\in$ $\mathcal{AP}$ is an atom and all $\phi$ are atomic propositions. Each symbol stands for the following: $\neg$ = not, $\land$ = logical and, $\lor$ = logical or, $\Box_I$ = globally, $\Diamond_I$ = future, $\mathcal{U}_I$ = until, $\mathcal{R}_I$ = release. \text{I} is an interval [lb,ub], where lb $\leq$, lb, ub $\in$ $\mathbb{N}$.
+
+\vspace{\baselineskip}
+
+\begin{comment}
+
+\textbf{Definition 2.} \textit{(MLTL Semantics) The satisfaction of an MLTL formula $\psi$, over a set of propositions $\mathcal{AP}$, but a computation/trace $\pi$ starting from positions i (denoted as $\pi,i \models \phi$ is recursively defined as the following:}
+
+\begin{itemize}
+    \item $\pi, i \models p \in \mathcal{AP}\ \textit{iff}\ p \in \pi[0]$
+    \item $\pi, i \models \neg \phi \textit{iff} \pi, i \nvDash \phi$
+    \item $\pi, i \models \phi_1 \land \phi_2 \textit{iff} \pi,i \models \phi_1 and \pi,i \models \phi_2$
+    \item $\pi,i \models \phi_1 \mathcal{U}_{lb,ub} \phi_2 \textit{iff} | \pi \geq i + lb and there exists j \in [i + lb, i + ub] such that \pi,j \models \phi_2 and for every k < j, k \in [i + lb, i + ub], \pi, k \in \phi_1 $
+\end{itemize}
+
+\end{comment}
+
+%\vspace{\baselineskip}
+
+This formalism may be unfamiliar to some CubeSat developers, so we provide multiple examples encoding specifications into MLTL in Section \ref{CSRS}. Extracting specifications for cyber-physical systems has proven to be a massive hurdle in practice \cite{Roz16}. Regular English statements pose the difficulty of handling unstated assumptions or implications. These factors pose a risk of misinterpretation when implemented into a real-time system \cite{Roz16}. Encoding these requirements removes this potential layer of abstraction, clearly defining the writer's intent.
+
+For example, a requirement that "the voltage of subsystem X should never exceed 5V during the mission" can be encoded into an MLTL specification in the following manner. First, we define the measured system X voltage as \texttt{sys$\_$voltage} and the 5V maximum to be a bound called \texttt{v$\_$bound}. We write the relation that the system voltage should not exceed this bound with an atomic proposition, shown below:
+
+\begin{equation}
+    \phi_1 = \texttt{sys$\_$voltage} \leq \texttt{v$\_$bound}
+\end{equation}
+
+Analyzing a system trace with this proposition returns a Boolean; "True" this is met or "False" this is not met. This requirement is valid throughout the entire mission, per the English statement. Using the above atomic proposition, we encode the full requirement into a specification:
+
+\begin{equation}
+    \Box_{[0,M]}(\phi_1)
+\end{equation}
+
+With MLTL, we can more effectively express this requirement while accounting for off-nominal data points caused by sensor noise or incorrect bits. To take this into account, we provide an additional temporal operator to the specification:
+
+\begin{equation}
+    \Box_{[0,M]}(\Box_{[0,2]}\phi_1)
+\end{equation}
+
+This specification allows for up to three off-nominal data points before a fault is declared. Including this additional operator removes the chance of false positives or false negatives.
 
 %%%%%%%%%%%%%%%%%%%%%
 \section{CubeSat Communications System Model} \label{CCSM}
@@ -139,11 +212,7 @@ The values we use for the orbital simulation are shown in Table \ref{OrbitalPara
 The simulation time is chosen to be one week in order to provide a non-trivial %"decently long" doesn't feel like a super technical/professional phrase; consider rewording
 time interval with many orbital passes, while also being reasonable for computation time. All values shown in this table are selected based upon the expected orbital parameters of ISU's first CubeSat mission, CySat \cite{Nelson2020}. This upcoming mission will be deployed via the nanoracks system on-board the International Space Station (ISS), so the orbital parameters are very close to those of the ISS. This portion of the model serves to provide us with orbital information of a user-defined CubeSat mission rather than building and launching a physical craft. We could use any Earth-orbiting CubeSat mission for this case study, provided that orbit brings the craft within line-of-sight of the virtual ground station at some point in time during the simulation. 
 
-The positions and velocities of the CubeSat calculated in the orbital simulation allow for imitating its interaction with a virtual ground station. We choose the location of the ground station to be at a latitude of 42.0236$^{\circ}$N and a longitude of -93.6528$^{\circ}$W as described in Table \ref{OrbitalParameters} in the Appendix. These parameters correspond to expected values for the CySat mission, which will use a real ground station at these coordinates to download data from the satellite \cite{Nelson2020}. We also note that the simulation assumes sea-level altitude for the ground station's position, and does not include topographical differences that might be present if the ground station location were to be changed.
-
-We next use output from the orbital simulation blocks along with the ground station position to determine if line-of-sight (LOS) between the CubeSat and ground station is achieved at each time step. Using the satellite position vector, and ground station position, we calculate the azimuth and elevation of the CubeSat with respect to the ground station. The simulation can then determine whether or not LOS is achieved between the CubeSat and the ground station by monitoring only the calculated elevation angle. Figure \ref{OrbitalDatasets} shows every dataset generated by the orbital simulation, including the number of orbits the CubeSat experiences, a binary representation of the LOS calculation, a binary representation of CubeSat and ground station connection, simulated received bits with the specified baud rate, and the azimuth and elevation angles of the CubeSat.
-
-The system variables referring to all of the datasets in Figure \ref{OrbitalDatasets} are shown in Table \ref{GroundStationVariables}. We refer to these variables throughout the rest of the paper, when describing the formal specifications written for each as well as in analyzing the RV output.
+The positions and velocities of the CubeSat calculated in the orbital simulation allow for imitating its interaction with a virtual ground station. We choose the location of the ground station to be at a latitude of 42.0236$^{\circ}$N and a longitude of -93.6528$^{\circ}$W as described in Table \ref{OrbitalParameters} in the Appendix. These parameters correspond to expected values for the CySat mission, which will use a real ground station at these coordinates to download data from the satellite \cite{Nelson2020}. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -156,7 +225,13 @@ The system variables referring to all of the datasets in Figure \ref{OrbitalData
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\vspace{15 mm}
+We also note that the simulation assumes sea-level altitude for the ground station's position, and does not include topographical differences that might be present if the ground station location were to be changed.
+
+We next use output from the orbital simulation blocks along with the ground station position to determine if line-of-sight (LOS) between the CubeSat and ground station is achieved at each time step. Using the satellite position vector, and ground station position, we calculate the azimuth and elevation of the CubeSat with respect to the ground station. The simulation can then determine whether or not LOS is achieved between the CubeSat and the ground station by monitoring only the calculated elevation angle. Figure \ref{OrbitalDatasets} shows every dataset generated by the orbital simulation, including the number of orbits the CubeSat experiences, a binary representation of the LOS calculation, a binary representation of CubeSat and ground station connection, simulated received bits with the specified baud rate, and the azimuth and elevation angles of the CubeSat.
+
+The system variables referring to all of the datasets in Figure \ref{OrbitalDatasets} are shown in Table \ref{GroundStationVariables}. We refer to these variables throughout the rest of the paper, when describing the formal specifications written for each as well as in analyzing the RV output.
+
+%\vspace{15 mm}
 
 \begin{table}[!h]
 \centering
